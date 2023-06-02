@@ -4,7 +4,7 @@ Plugin Name: WPU Tarte Au Citron
 Plugin URI: https://github.com/WordPressUtilities/wputarteaucitron
 Update URI: https://github.com/WordPressUtilities/wputarteaucitron
 Description: Simple implementation for Tarteaucitron.js
-Version: 0.1.0
+Version: 0.2.0
 Author: Darklg
 Author URI: https://darklg.me/
 Text Domain: wputarteaucitron
@@ -19,7 +19,7 @@ class WPUTarteAuCitron {
     public $plugin_description;
     public $settings_details;
     public $settings;
-    private $plugin_version = '0.1.0';
+    private $plugin_version = '0.2.0';
     private $settings_obj;
     private $plugin_settings = array(
         'id' => 'wputarteaucitron',
@@ -62,10 +62,25 @@ class WPUTarteAuCitron {
                 'label' => __('Privacy URL', 'wputarteaucitron'),
                 'type' => 'page'
             ),
+            'custom_icon_id' => array(
+                'section' => 'settings',
+                'label' => __('Custom Icon', 'wputarteaucitron'),
+                'type' => 'media'
+            ),
             'gtm_id' => array(
                 'section' => 'trackers',
                 'help' => 'Example : GTM-1234',
                 'label' => __('GTM ID', 'wputarteaucitron')
+            ),
+            'ga4_id' => array(
+                'section' => 'trackers',
+                'help' => 'Example : G-XXXXXXXXX',
+                'label' => __('GA 4 ID', 'wputarteaucitron')
+            ),
+            'fbpix_id' => array(
+                'section' => 'trackers',
+                'help' => 'Example : 123487593',
+                'label' => __('Facebook Pixel ID', 'wputarteaucitron')
             )
         );
         include dirname(__FILE__) . '/inc/WPUBaseSettings/WPUBaseSettings.php';
@@ -80,10 +95,14 @@ class WPUTarteAuCitron {
         /* Front Script with localization / variables */
         wp_register_script('wputarteaucitron_main', plugins_url('assets/tarteaucitron/tarteaucitron.js', __FILE__), array(), $this->plugin_version, true);
         wp_register_script('wputarteaucitron_front_script', plugins_url('assets/front.js', __FILE__), array('wputarteaucitron_main'), $this->plugin_version, true);
-        wp_localize_script('wputarteaucitron_front_script', 'wputarteaucitron_settings', array(
+        $script_settings = array(
+            'fbpix_id' => isset($settings['fbpix_id']) ? $settings['fbpix_id'] : false,
+            'ga4_id' => isset($settings['ga4_id']) ? $settings['ga4_id'] : false,
             'gtm_id' => isset($settings['gtm_id']) ? $settings['gtm_id'] : false,
-            'privacy_page' => isset($settings['privacy_page_id']) ? get_page_link($settings['privacy_page_id']) : false
-        ));
+            'privacy_page' => isset($settings['privacy_page_id']) ? get_page_link($settings['privacy_page_id']) : false,
+            'custom_icon' => isset($settings['custom_icon_id']) ? wp_get_attachment_image_url($settings['custom_icon_id'], 'thumbnail') : false
+        );
+        wp_localize_script('wputarteaucitron_front_script', 'wputarteaucitron_settings', $script_settings);
         wp_enqueue_script('wputarteaucitron_front_script');
     }
 }
