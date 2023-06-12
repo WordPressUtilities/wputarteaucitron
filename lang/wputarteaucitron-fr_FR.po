@@ -1,7 +1,9 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: WPU Tarte Au Citron\n"
+"POT-Creation-Date: 2023-06-12 14:32+0200\n"
 "PO-Revision-Date: \n"
+"Last-Translator: \n"
 "Language-Team: \n"
 "Language: fr_FR\n"
 "MIME-Version: 1.0\n"
@@ -10,6 +12,70 @@ msgstr ""
 "X-Poedit-SourceCharset: UTF-8\n"
 "X-Poedit-Basepath: .\n"
 "X-Poedit-KeywordsList: __;_x;_e\n"
+"X-Generator: Poedit 3.3\n"
 "X-Poedit-SearchPath-0: ../.\n"
 "X-Poedit-SearchPathExcluded-0: inc/WPUBaseAdminDatas\n"
 "X-Poedit-SearchPathExcluded-1: inc/WPUBaseSettings\n"
+
+#: .././inc/WPUBaseSettings/WPUBaseSettings.php:136
+#: .././inc/WPUBaseSettings/WPUBaseSettings.php:552
+#: .././inc/WPUBaseSettings/WPUBaseSettings.php:559
+#: .././wputarteaucitron.php:52
+msgid "Settings"
+msgstr ""
+
+#: .././inc/WPUBaseSettings/WPUBaseSettings.php:165
+msgid "No"
+msgstr ""
+
+#: .././inc/WPUBaseSettings/WPUBaseSettings.php:165
+msgid "Yes"
+msgstr ""
+
+#: .././inc/WPUBaseSettings/WPUBaseSettings.php:301
+msgid "Settings saved."
+msgstr ""
+
+#: .././inc/WPUBaseSettings/WPUBaseSettings.php:347
+msgid "Upload New Media"
+msgstr ""
+
+#: .././inc/WPUBaseSettings/WPUBaseSettings.php:498
+msgid "Language"
+msgstr ""
+
+#: .././inc/WPUBaseSettings/WPUBaseSettings.php:574
+msgid "Save"
+msgstr "Sauvegarder"
+
+#: .././wputarteaucitron.php:40
+msgid "Simple implementation for Tarteaucitron.js"
+msgstr "Une implementation simple pour Tarteaucitron.js"
+
+#: .././wputarteaucitron.php:55
+msgid "Trackers"
+msgstr "Trackers"
+
+#: .././wputarteaucitron.php:62
+msgid "Privacy URL"
+msgstr "URL de la page de confidentialité"
+
+#: .././wputarteaucitron.php:67
+msgid "Custom Icon"
+msgstr "Icône personnalisée"
+
+#: .././wputarteaucitron.php:72
+msgid "Banner position"
+msgstr "Position de la bannière"
+
+#: .././wputarteaucitron.php:83
+msgid "GTM ID"
+msgstr "GTM ID"
+
+#: .././wputarteaucitron.php:88
+msgid "GA 4 ID"
+msgstr "GA 4 ID"
+
+#: .././wputarteaucitron.php:93
+msgid "Facebook Pixel ID"
+msgstr "Facebook Pixel ID"

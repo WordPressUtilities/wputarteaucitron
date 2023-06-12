@@ -4,7 +4,7 @@ Plugin Name: WPU Tarte Au Citron
 Plugin URI: https://github.com/WordPressUtilities/wputarteaucitron
 Update URI: https://github.com/WordPressUtilities/wputarteaucitron
 Description: Simple implementation for Tarteaucitron.js
-Version: 0.2.0
+Version: 0.2.1
 Author: Darklg
 Author URI: https://darklg.me/
 Text Domain: wputarteaucitron
@@ -19,7 +19,7 @@ class WPUTarteAuCitron {
     public $plugin_description;
     public $settings_details;
     public $settings;
-    private $plugin_version = '0.2.0';
+    private $plugin_version = '0.2.1';
     private $settings_obj;
     private $plugin_settings = array(
         'id' => 'wputarteaucitron',
@@ -67,6 +67,16 @@ class WPUTarteAuCitron {
                 'label' => __('Custom Icon', 'wputarteaucitron'),
                 'type' => 'media'
             ),
+            'banner_orientation' => array(
+                'section' => 'settings',
+                'label' => __('Banner position', 'wputarteaucitron'),
+                'type' => 'select',
+                'datas' => array(
+                    'bottom' => 'Bottom',
+                    'middle' => 'Middle',
+                    'top' => 'Top'
+                )
+            ),
             'gtm_id' => array(
                 'section' => 'trackers',
                 'help' => 'Example : GTM-1234',
@@ -99,6 +109,7 @@ class WPUTarteAuCitron {
             'fbpix_id' => isset($settings['fbpix_id']) ? $settings['fbpix_id'] : false,
             'ga4_id' => isset($settings['ga4_id']) ? $settings['ga4_id'] : false,
             'gtm_id' => isset($settings['gtm_id']) ? $settings['gtm_id'] : false,
+            'banner_orientation' => isset($settings['banner_orientation']) ? $settings['banner_orientation'] : 'bottom',
             'privacy_page' => isset($settings['privacy_page_id']) ? get_page_link($settings['privacy_page_id']) : false,
             'custom_icon' => isset($settings['custom_icon_id']) ? wp_get_attachment_image_url($settings['custom_icon_id'], 'thumbnail') : false
         );

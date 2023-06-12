@@ -6,10 +6,10 @@
 
     var _settings = {
         "privacyUrl": wputarteaucitron_settings.privacy_page ? wputarteaucitron_settings.privacy_page : '',
+        "orientation": wputarteaucitron_settings.banner_orientation ? wputarteaucitron_settings.banner_orientation : 'bottom',
         "bodyPosition": "bottom",
         "hashtag": "#tarteaucitron",
         "cookieName": "tarteaucitron",
-        "orientation": "bottom",
         "groupServices": false,
         "serviceDefaultState": "wait",
         "showAlertSmall": false,
