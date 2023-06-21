@@ -4,12 +4,12 @@ Plugin Name: WPU Tarte Au Citron
 Plugin URI: https://github.com/WordPressUtilities/wputarteaucitron
 Update URI: https://github.com/WordPressUtilities/wputarteaucitron
 Description: Simple implementation for Tarteaucitron.js
-Version: 0.2.1
+Version: 0.2.2
 Author: Darklg
 Author URI: https://darklg.me/
 Text Domain: wputarteaucitron
 Domain Path: /lang/
-Requires at least: 6.0
+Requires at least: 6.2
 Requires PHP: 8.0
 License: MIT License
 License URI: https://opensource.org/licenses/MIT
@@ -19,7 +19,8 @@ class WPUTarteAuCitron {
     public $plugin_description;
     public $settings_details;
     public $settings;
-    private $plugin_version = '0.2.1';
+    private $script_version = '0.2.2';
+    private $plugin_version = '0.2.2';
     private $settings_obj;
     private $plugin_settings = array(
         'id' => 'wputarteaucitron',
@@ -77,6 +78,12 @@ class WPUTarteAuCitron {
                     'top' => 'Top'
                 )
             ),
+            'banner_message' => array(
+                'section' => 'settings',
+                'label' => __('Banner message', 'wputarteaucitron'),
+                'lang' => 1,
+                'type' => 'textarea'
+            ),
             'gtm_id' => array(
                 'section' => 'trackers',
                 'help' => 'Example : GTM-1234',
@@ -99,6 +106,7 @@ class WPUTarteAuCitron {
 
     public function wp_enqueue_scripts() {
         $settings = $this->settings_obj->get_settings();
+        $current_lang = $this->settings_obj->get_current_language();
         /* Front Style */
         wp_register_style('wputarteaucitron_front_style', plugins_url('assets/front.css', __FILE__), array(), $this->plugin_version);
         wp_enqueue_style('wputarteaucitron_front_style');
@@ -106,6 +114,7 @@ class WPUTarteAuCitron {
         wp_register_script('wputarteaucitron_main', plugins_url('assets/tarteaucitron/tarteaucitron.js', __FILE__), array(), $this->plugin_version, true);
         wp_register_script('wputarteaucitron_front_script', plugins_url('assets/front.js', __FILE__), array('wputarteaucitron_main'), $this->plugin_version, true);
         $script_settings = array(
+            'banner_message' => $current_lang ? strip_tags($this->settings_obj->get_setting('banner_message', !!$current_lang)) : false,
             'fbpix_id' => isset($settings['fbpix_id']) ? $settings['fbpix_id'] : false,
             'ga4_id' => isset($settings['ga4_id']) ? $settings['ga4_id'] : false,
             'gtm_id' => isset($settings['gtm_id']) ? $settings['gtm_id'] : false,

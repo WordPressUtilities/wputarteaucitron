@@ -34,6 +34,13 @@
         _settings.iconSrc = wputarteaucitron_settings.custom_icon;
     }
 
+    /* Custom message */
+    if (wputarteaucitron_settings.banner_message) {
+        window.tarteaucitronCustomText = {
+            "alertBigPrivacy": wputarteaucitron_settings.banner_message
+        };
+    }
+
     /* ----------------------------------------------------------
       Init script
     ---------------------------------------------------------- */

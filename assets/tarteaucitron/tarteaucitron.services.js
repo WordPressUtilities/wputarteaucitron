@@ -37,6 +37,25 @@ tarteaucitron.services.iframe = {
     }
 };
 
+// actistat
+tarteaucitron.services.actistat = {
+    "key": "actistat",
+    "type": "analytic",
+    "name": "ActiSTAT",
+    "uri": "https://actigraph.com/actistat",
+    "needConsent": true,
+    "cookies": [],
+    "js": function () {
+        "use strict";
+
+        if (tarteaucitron.user.actistatId === undefined) {
+            return;
+        }
+
+        tarteaucitron.addScript('https://actistat.fr/umami.js', '', '', '', 'data-website-id', tarteaucitron.user.actistatId);
+    }
+};
+
 // outbrainamplify
 tarteaucitron.services.outbrainamplify = {
     "key": "outbrainamplify",
@@ -766,7 +785,7 @@ tarteaucitron.services.piwikpro = {
     "cookies": ['_pk_ref', '_pk_cvar', '_pk_id', '_pk_ses', '_pk_hsr', 'piwik_ignore', '_pk_uid'],
     "js": function () {
         "use strict";
-        if (tarteaucitron.user.piwikProId === undefined) {
+        if (tarteaucitron.user.piwikProId === undefined || tarteaucitron.user.piwikProContainer === undefined) {
             return;
         }
 
@@ -789,7 +808,7 @@ tarteaucitron.services.piwikpro = {
         var qP = [];
 
         var qPString = qP.length > 0 ? ("?" + qP.join("&")) : "";
-        tarteaucitron.addScript('https://carsatse.containers.piwik.pro/'+tarteaucitron.user.piwikProId+'.js'+qPString);
+        tarteaucitron.addScript('https://'+tarteaucitron.user.piwikProContainer+'.containers.piwik.pro/'+tarteaucitron.user.piwikProId+'.js'+qPString);
 
         ! function(a, n, i) {
            a[n] = a[n] || {};
@@ -2298,9 +2317,9 @@ tarteaucitron.services.simpleanalytics = {
 tarteaucitron.services.stonly = {
     "key": "stonly",
     "type": "api",
-    "name": "Stonly",
-    "uri": "https://stonly.com/privacy",
-    "needConsent": true,
+    "name": "Stonly (privacy by design)",
+    "uri": "https://trust.stonly.com/",
+    "needConsent": false,
     "cookies": [],
     "js": function () {
         "use strict";
@@ -3138,7 +3157,7 @@ tarteaucitron.services.instagram = {
                 frame_height = '"" ';
             }
 
-            post_frame = '<iframe title="' + frame_title + '" src="//www.instagram.com/' + post_id + '/embed" ' + frame_width + frame_height + '></iframe>';
+            post_frame = '<iframe title="' + frame_title + '" src="//www.instagram.com/p/' + post_id + '/embed" ' + frame_width + frame_height + '></iframe>';
 
             return post_frame;
         });
@@ -4379,7 +4398,9 @@ tarteaucitron.services.youtube = {
                 frame_height = 'height=',
                 video_frame,
                 allowfullscreen = tarteaucitron.getElemAttr(x, "allowfullscreen"),
-                attrs = ["theme", "rel", "controls", "showinfo", "autoplay", "mute", "start", "loop", "enablejsapi"],
+                start = tarteaucitron.getElemAttr(x, "start"),
+                end = tarteaucitron.getElemAttr(x, "end"),
+                attrs = ["theme", "rel", "controls", "showinfo", "autoplay", "mute", "start", "end", "loop", "enablejsapi"],
                 params = attrs.filter(function (a) {
                     return tarteaucitron.getElemAttr(x, a) !== null;
                 }).map(function (a) {
@@ -4846,7 +4867,7 @@ tarteaucitron.services.matomocloud = {
     "type": "analytic",
     "name": "Matomo Cloud (privacy by design)",
     "uri": "https://matomo.org/faq/general/faq_146/",
-    "needConsent": false,
+    "needConsent": true,
     "cookies": ['_pk_ref', '_pk_cvar', '_pk_id', '_pk_ses', '_pk_hsr', 'mtm_consent', 'matomo_ignore', 'matomo_sessid'],
     "js": function () {
         "use strict";
@@ -4855,8 +4876,8 @@ tarteaucitron.services.matomocloud = {
         }
 
         window._paq = window._paq || [];
-        window._paq.push(["requireCookieConsent"]);
-        window._paq.push(["setCookieConsentGiven"]);
+        window._paq.push(["requireConsent"]);
+        window._paq.push(["setConsentGiven"]);
         window._paq.push(["setSiteId", tarteaucitron.user.matomoId]);
         window._paq.push(["setTrackerUrl", tarteaucitron.user.matomoHost + "matomo.php"]);
         window._paq.push(["trackPageView"]);
@@ -4897,7 +4918,7 @@ tarteaucitron.services.matomocloud = {
         }
 
         window._paq = window._paq || [];
-        window._paq.push(["requireCookieConsent"]);
+        window._paq.push(["requireConsent"]);
         window._paq.push(["setSiteId", tarteaucitron.user.matomoId]);
         window._paq.push(["setTrackerUrl", tarteaucitron.user.matomoHost + "matomo.php"]);
         window._paq.push(["trackPageView"]);

@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: WPU Tarte Au Citron\n"
-"POT-Creation-Date: 2023-06-12 14:32+0200\n"
+"POT-Creation-Date: 2023-06-21 19:11+0200\n"
 "PO-Revision-Date: \n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -18,9 +18,9 @@ msgstr ""
 "X-Poedit-SearchPathExcluded-1: inc/WPUBaseSettings\n"
 
 #: .././inc/WPUBaseSettings/WPUBaseSettings.php:136
-#: .././inc/WPUBaseSettings/WPUBaseSettings.php:552
-#: .././inc/WPUBaseSettings/WPUBaseSettings.php:559
-#: .././wputarteaucitron.php:52
+#: .././inc/WPUBaseSettings/WPUBaseSettings.php:558
+#: .././inc/WPUBaseSettings/WPUBaseSettings.php:565
+#: .././wputarteaucitron.php:53
 msgid "Settings"
 msgstr ""
 
@@ -36,46 +36,50 @@ msgstr ""
 msgid "Settings saved."
 msgstr ""
 
-#: .././inc/WPUBaseSettings/WPUBaseSettings.php:347
+#: .././inc/WPUBaseSettings/WPUBaseSettings.php:353
 msgid "Upload New Media"
 msgstr ""
 
-#: .././inc/WPUBaseSettings/WPUBaseSettings.php:498
+#: .././inc/WPUBaseSettings/WPUBaseSettings.php:504
 msgid "Language"
 msgstr ""
 
-#: .././inc/WPUBaseSettings/WPUBaseSettings.php:574
+#: .././inc/WPUBaseSettings/WPUBaseSettings.php:580
 msgid "Save"
 msgstr "Sauvegarder"
 
-#: .././wputarteaucitron.php:40
+#: .././wputarteaucitron.php:41
 msgid "Simple implementation for Tarteaucitron.js"
 msgstr "Une implementation simple pour Tarteaucitron.js"
 
-#: .././wputarteaucitron.php:55
+#: .././wputarteaucitron.php:56
 msgid "Trackers"
 msgstr "Trackers"
 
-#: .././wputarteaucitron.php:62
+#: .././wputarteaucitron.php:63
 msgid "Privacy URL"
 msgstr "URL de la page de confidentialité"
 
-#: .././wputarteaucitron.php:67
+#: .././wputarteaucitron.php:68
 msgid "Custom Icon"
 msgstr "Icône personnalisée"
 
-#: .././wputarteaucitron.php:72
+#: .././wputarteaucitron.php:73
 msgid "Banner position"
 msgstr "Position de la bannière"
 
 #: .././wputarteaucitron.php:83
+msgid "Banner message"
+msgstr "Message de la bannière"
+
+#: .././wputarteaucitron.php:90
 msgid "GTM ID"
 msgstr "GTM ID"
 
-#: .././wputarteaucitron.php:88
+#: .././wputarteaucitron.php:95
 msgid "GA 4 ID"
 msgstr "GA 4 ID"
 
-#: .././wputarteaucitron.php:93
+#: .././wputarteaucitron.php:100
 msgid "Facebook Pixel ID"
 msgstr "Facebook Pixel ID"
