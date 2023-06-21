@@ -1,5 +1,5 @@
 # WPU Tarte Au Citron
 
-Simple implementation for Tarteaucitron.js.
+Simple WordPress plugin to implement [https://github.com/AmauriC/tarteaucitron.js](Tarteaucitron.js).
 
 This plugin is NOT AFFILIATED WITH Tarteaucitron.js.

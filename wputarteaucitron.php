@@ -4,7 +4,7 @@ Plugin Name: WPU Tarte Au Citron
 Plugin URI: https://github.com/WordPressUtilities/wputarteaucitron
 Update URI: https://github.com/WordPressUtilities/wputarteaucitron
 Description: Simple implementation for Tarteaucitron.js
-Version: 0.2.3
+Version: 0.2.4
 Author: Darklg
 Author URI: https://darklg.me/
 Text Domain: wputarteaucitron
@@ -19,7 +19,7 @@ class WPUTarteAuCitron {
     public $plugin_description;
     public $settings_details;
     public $settings;
-    private $script_version = '0.2.3';
+    private $script_version = '0.2.4';
     private $plugin_version = '1.12.0';
     private $settings_obj;
     private $plugin_settings = array(
@@ -113,8 +113,9 @@ class WPUTarteAuCitron {
         /* Front Script with localization / variables */
         wp_register_script('wputarteaucitron_main', plugins_url('assets/tarteaucitron/tarteaucitron.js', __FILE__), array(), $this->plugin_version, true);
         wp_register_script('wputarteaucitron_front_script', plugins_url('assets/front.js', __FILE__), array('wputarteaucitron_main'), $this->plugin_version, true);
+
         $script_settings = array(
-            'banner_message' => $current_lang ? strip_tags($this->settings_obj->get_setting('banner_message', !!$current_lang)) : false,
+            'banner_message' => $this->settings_obj->get_setting('banner_message', !!$current_lang),
             'fbpix_id' => isset($settings['fbpix_id']) ? $settings['fbpix_id'] : false,
             'ga4_id' => isset($settings['ga4_id']) ? $settings['ga4_id'] : false,
             'gtm_id' => isset($settings['gtm_id']) ? $settings['gtm_id'] : false,
