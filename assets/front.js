@@ -1,5 +1,7 @@
 (function() {
 
+    'use strict';
+
     /* ----------------------------------------------------------
       Settings
     ---------------------------------------------------------- */
@@ -51,21 +53,23 @@
       Trackers
     ---------------------------------------------------------- */
 
+    tarteaucitron.job = tarteaucitron.job || [];
+
     /* GTM */
     if (wputarteaucitron_settings.gtm_id) {
         tarteaucitron.user.googletagmanagerId = wputarteaucitron_settings.gtm_id;
-        (tarteaucitron.job = tarteaucitron.job || []).push('googletagmanager');
+        tarteaucitron.job.push('googletagmanager');
     }
 
     /* GA 4 */
     if (wputarteaucitron_settings.ga4_id) {
         tarteaucitron.user.gtagUa = wputarteaucitron_settings.ga4_id;
-        (tarteaucitron.job = tarteaucitron.job || []).push('gtag');
+        tarteaucitron.job.push('gtag');
     }
 
     /* Facebook Pixel */
     if (wputarteaucitron_settings.fbpix_id) {
         tarteaucitron.user.facebookpixelId = wputarteaucitron_settings.fbpix_id;
-        (tarteaucitron.job = tarteaucitron.job || []).push('facebookpixel');
+        tarteaucitron.job.push('facebookpixel');
     }
 }());
