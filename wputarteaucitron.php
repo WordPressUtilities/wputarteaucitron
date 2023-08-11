@@ -4,7 +4,7 @@ Plugin Name: WPU Tarte Au Citron
 Plugin URI: https://github.com/WordPressUtilities/wputarteaucitron
 Update URI: https://github.com/WordPressUtilities/wputarteaucitron
 Description: Simple implementation for Tarteaucitron.js
-Version: 0.3.0
+Version: 0.4.0
 Author: Darklg
 Author URI: https://darklg.me/
 Text Domain: wputarteaucitron
@@ -19,8 +19,8 @@ class WPUTarteAuCitron {
     public $plugin_description;
     public $settings_details;
     public $settings;
-    private $script_version = '0.3.0';
-    private $plugin_version = '1.12.0';
+    private $plugin_version = '0.4.0';
+    private $tarteaucitron_version = '1.14.0';
     private $settings_obj;
     private $plugin_settings = array(
         'id' => 'wputarteaucitron',
@@ -69,6 +69,17 @@ class WPUTarteAuCitron {
                 'label' => __('Custom Icon', 'wputarteaucitron'),
                 'type' => 'media'
             ),
+            'icon_position' => array(
+                'section' => 'settings',
+                'label' => __('Icon position', 'wputarteaucitron'),
+                'type' => 'select',
+                'datas' => array(
+                    'BottomRight' => 'BottomRight',
+                    'BottomLeft' => 'BottomLeft',
+                    'TopRight' => 'TopRight',
+                    'TopLeft' => 'TopLeft'
+                )
+            ),
             'banner_orientation' => array(
                 'section' => 'settings',
                 'label' => __('Banner position', 'wputarteaucitron'),
@@ -115,12 +126,17 @@ class WPUTarteAuCitron {
         wp_register_style('wputarteaucitron_front_style', plugins_url('assets/front.css', __FILE__), array(), $this->plugin_version);
         wp_enqueue_style('wputarteaucitron_front_style');
         /* Front Script with localization / variables */
-        wp_register_script('wputarteaucitron_main', plugins_url('assets/tarteaucitron/tarteaucitron.js', __FILE__), array(), $this->plugin_version, true);
+        wp_register_script('wputarteaucitron_main', plugins_url('assets/tarteaucitron/tarteaucitron.js', __FILE__), array(), $this->tarteaucitron_version, true);
         wp_register_script('wputarteaucitron_front_script', plugins_url('assets/front.js', __FILE__), array('wputarteaucitron_main'), $this->plugin_version, true);
 
         $script_settings = array(
+            'accept_all_cta' => true,
+            'deny_all_cta' => false,
+            'cookie_name' => 'tarteaucitron',
+            'hashtag' => '#tarteaucitron',
             'banner_message' => $this->settings_obj->get_setting('banner_message', !!$current_lang),
             'banner_orientation' => isset($settings['banner_orientation']) ? $settings['banner_orientation'] : 'bottom',
+            'icon_position' => isset($settings['icon_position']) ? $settings['icon_position'] : 'BottomRight',
             'privacy_page' => isset($settings['privacy_page_id']) ? get_page_link($settings['privacy_page_id']) : false,
             'custom_icon' => isset($settings['custom_icon_id']) ? wp_get_attachment_image_url($settings['custom_icon_id'], 'thumbnail') : false
         );
@@ -134,6 +150,8 @@ class WPUTarteAuCitron {
             }
             $script_settings[$key] = $settings[$key];
         }
+
+        $script_settings = apply_filters('wputarteaucitron__script_settings', $script_settings);
 
         wp_localize_script('wputarteaucitron_front_script', 'wputarteaucitron_settings', $script_settings);
         wp_enqueue_script('wputarteaucitron_front_script');
