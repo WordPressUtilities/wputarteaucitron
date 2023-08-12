@@ -4,7 +4,7 @@ Plugin Name: WPU Tarte Au Citron
 Plugin URI: https://github.com/WordPressUtilities/wputarteaucitron
 Update URI: https://github.com/WordPressUtilities/wputarteaucitron
 Description: Simple implementation for Tarteaucitron.js
-Version: 0.4.0
+Version: 0.4.1
 Author: Darklg
 Author URI: https://darklg.me/
 Text Domain: wputarteaucitron
@@ -19,7 +19,7 @@ class WPUTarteAuCitron {
     public $plugin_description;
     public $settings_details;
     public $settings;
-    private $plugin_version = '0.4.0';
+    private $plugin_version = '0.4.1';
     private $tarteaucitron_version = '1.14.0';
     private $settings_obj;
     private $plugin_settings = array(
@@ -96,6 +96,11 @@ class WPUTarteAuCitron {
                 'lang' => 1,
                 'type' => 'textarea'
             ),
+            'display_deny_all_cta' => array(
+                'section' => 'settings',
+                'label' => __('Display the “Deny All” CTA', 'wputarteaucitron'),
+                'type' => 'select'
+            ),
             'gtm_id' => array(
                 'wputarteaucitron_value' => true,
                 'section' => 'trackers',
@@ -113,6 +118,11 @@ class WPUTarteAuCitron {
                 'section' => 'trackers',
                 'help' => 'Example : 123487593',
                 'label' => __('Facebook Pixel ID', 'wputarteaucitron')
+            ),
+            'hubspot_api_key' => array(
+                'wputarteaucitron_value' => true,
+                'section' => 'trackers',
+                'label' => __('Hubspot API Key', 'wputarteaucitron')
             )
         );
         include dirname(__FILE__) . '/inc/WPUBaseSettings/WPUBaseSettings.php';
@@ -131,14 +141,14 @@ class WPUTarteAuCitron {
 
         $script_settings = array(
             'accept_all_cta' => true,
-            'deny_all_cta' => false,
+            'deny_all_cta' => isset($settings['display_deny_all_cta']) && $settings['display_deny_all_cta'],
             'cookie_name' => 'tarteaucitron',
             'hashtag' => '#tarteaucitron',
             'banner_message' => $this->settings_obj->get_setting('banner_message', !!$current_lang),
             'banner_orientation' => isset($settings['banner_orientation']) ? $settings['banner_orientation'] : 'bottom',
             'icon_position' => isset($settings['icon_position']) ? $settings['icon_position'] : 'BottomRight',
-            'privacy_page' => isset($settings['privacy_page_id']) ? get_page_link($settings['privacy_page_id']) : false,
-            'custom_icon' => isset($settings['custom_icon_id']) ? wp_get_attachment_image_url($settings['custom_icon_id'], 'thumbnail') : false
+            'privacy_page' => isset($settings['privacy_page_id']) && is_numeric($settings['privacy_page_id']) ? get_page_link($settings['privacy_page_id']) : false,
+            'custom_icon' => isset($settings['custom_icon_id']) && is_numeric($settings['custom_icon_id']) ? wp_get_attachment_image_url($settings['custom_icon_id'], 'thumbnail') : false
         );
 
         foreach ($this->settings as $key => $details) {

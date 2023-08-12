@@ -8,7 +8,7 @@
 
     var _settings = {
         "privacyUrl": wputarteaucitron_settings.privacy_page ? wputarteaucitron_settings.privacy_page : '',
-        "orientation": wputarteaucitron_settings.banner_orientation ? wputarteaucitron_settings.banner_orientation : 'bottom',
+        "orientation": wputarteaucitron_settings.banner_orientation,
         "hashtag": wputarteaucitron_settings.hashtag,
         "cookieName": wputarteaucitron_settings.cookie_name,
         "iconPosition": wputarteaucitron_settings.icon_position,
@@ -71,5 +71,11 @@
     if (wputarteaucitron_settings.fbpix_id) {
         tarteaucitron.user.facebookpixelId = wputarteaucitron_settings.fbpix_id;
         tarteaucitron.job.push('facebookpixel');
+    }
+
+    /* Hubspot */
+    if (wputarteaucitron_settings.hubspot_api_key) {
+        tarteaucitron.user.hubspotId = wputarteaucitron_settings.hubspot_api_key;
+        (tarteaucitron.job = tarteaucitron.job || []).push('hubspot');
     }
 }());

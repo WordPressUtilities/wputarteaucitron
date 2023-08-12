@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: WPU Tarte Au Citron\n"
-"POT-Creation-Date: 2023-08-11 07:54+0200\n"
+"POT-Creation-Date: 2023-08-12 20:54+0200\n"
 "PO-Revision-Date: \n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -76,14 +76,22 @@ msgstr "Position de la bannière"
 msgid "Banner message"
 msgstr "Message de la bannière"
 
-#: .././wputarteaucitron.php:103
+#: .././wputarteaucitron.php:101
+msgid "Display the “Deny All” CTA"
+msgstr "Afficher le CTA « Refuser tout »"
+
+#: .././wputarteaucitron.php:108
 msgid "GTM ID"
 msgstr "GTM ID"
 
-#: .././wputarteaucitron.php:109
+#: .././wputarteaucitron.php:114
 msgid "GA 4 ID"
 msgstr "GA 4 ID"
 
-#: .././wputarteaucitron.php:115
+#: .././wputarteaucitron.php:120
 msgid "Facebook Pixel ID"
 msgstr "Facebook Pixel ID"
+
+#: .././wputarteaucitron.php:125
+msgid "Hubspot API Key"
+msgstr "Clé API Hubspot"
