@@ -4,7 +4,7 @@ Plugin Name: WPU Tarte Au Citron
 Plugin URI: https://github.com/WordPressUtilities/wputarteaucitron
 Update URI: https://github.com/WordPressUtilities/wputarteaucitron
 Description: Simple implementation for Tarteaucitron.js
-Version: 0.4.1
+Version: 0.4.2
 Author: Darklg
 Author URI: https://darklg.me/
 Text Domain: wputarteaucitron
@@ -19,7 +19,7 @@ class WPUTarteAuCitron {
     public $plugin_description;
     public $settings_details;
     public $settings;
-    private $plugin_version = '0.4.1';
+    private $plugin_version = '0.4.2';
     private $tarteaucitron_version = '1.14.0';
     private $settings_obj;
     private $plugin_settings = array(
@@ -61,6 +61,7 @@ class WPUTarteAuCitron {
             'privacy_page_id' => array(
                 'section' => 'settings',
                 'label' => __('Privacy URL', 'wputarteaucitron'),
+                'lang' => 1,
                 'type' => 'post',
                 'post_type' => 'page'
             ),
@@ -139,6 +140,20 @@ class WPUTarteAuCitron {
         wp_register_script('wputarteaucitron_main', plugins_url('assets/tarteaucitron/tarteaucitron.js', __FILE__), array(), $this->tarteaucitron_version, true);
         wp_register_script('wputarteaucitron_front_script', plugins_url('assets/front.js', __FILE__), array('wputarteaucitron_main'), $this->plugin_version, true);
 
+        /* Privacy page */
+        $privacy_page = false;
+        $privacy_page_id = false;
+        if (isset($setting['privacy_page_id']) && $setting['privacy_page_id']) {
+            $privacy_page_id = $setting['privacy_page_id'];
+        }
+        $privacy_page_id_lang = $this->settings_obj->get_setting('privacy_page_id', !!$current_lang);
+        if ($privacy_page_id_lang) {
+            $privacy_page_id = $privacy_page_id_lang;
+        }
+        if ($privacy_page_id) {
+            $privacy_page = get_page_link($privacy_page_id);
+        }
+
         $script_settings = array(
             'accept_all_cta' => true,
             'deny_all_cta' => isset($settings['display_deny_all_cta']) && $settings['display_deny_all_cta'],
@@ -147,7 +162,7 @@ class WPUTarteAuCitron {
             'banner_message' => $this->settings_obj->get_setting('banner_message', !!$current_lang),
             'banner_orientation' => isset($settings['banner_orientation']) ? $settings['banner_orientation'] : 'bottom',
             'icon_position' => isset($settings['icon_position']) ? $settings['icon_position'] : 'BottomRight',
-            'privacy_page' => isset($settings['privacy_page_id']) && is_numeric($settings['privacy_page_id']) ? get_page_link($settings['privacy_page_id']) : false,
+            'privacy_page' => $privacy_page,
             'custom_icon' => isset($settings['custom_icon_id']) && is_numeric($settings['custom_icon_id']) ? wp_get_attachment_image_url($settings['custom_icon_id'], 'thumbnail') : false
         );
 
