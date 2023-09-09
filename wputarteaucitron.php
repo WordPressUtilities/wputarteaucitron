@@ -4,7 +4,7 @@ Plugin Name: WPU Tarte Au Citron
 Plugin URI: https://github.com/WordPressUtilities/wputarteaucitron
 Update URI: https://github.com/WordPressUtilities/wputarteaucitron
 Description: Simple implementation for Tarteaucitron.js
-Version: 0.4.2
+Version: 0.5.0
 Author: Darklg
 Author URI: https://darklg.me/
 Text Domain: wputarteaucitron
@@ -19,7 +19,7 @@ class WPUTarteAuCitron {
     public $plugin_description;
     public $settings_details;
     public $settings;
-    private $plugin_version = '0.4.2';
+    private $plugin_version = '0.5.0';
     private $tarteaucitron_version = '1.14.0';
     private $settings_obj;
     private $plugin_settings = array(
@@ -58,6 +58,14 @@ class WPUTarteAuCitron {
             )
         );
         $this->settings = array(
+            'enable_banner' => array(
+                'section' => 'settings',
+                'label' => __('Activate banner', 'wputarteaucitron'),
+                'required' => true,
+                'help' => __('Banner will be visible and scripts will be loaded', 'wputarteaucitron'),
+                'default_value' => '1',
+                'type' => 'radio'
+            ),
             'privacy_page_id' => array(
                 'section' => 'settings',
                 'label' => __('Privacy URL', 'wputarteaucitron'),
@@ -126,13 +134,19 @@ class WPUTarteAuCitron {
                 'label' => __('Hubspot API Key', 'wputarteaucitron')
             )
         );
-        include dirname(__FILE__) . '/inc/WPUBaseSettings/WPUBaseSettings.php';
+        require_once dirname(__FILE__) . '/inc/WPUBaseSettings/WPUBaseSettings.php';
         $this->settings_obj = new \wputarteaucitron\WPUBaseSettings($this->settings_details, $this->settings);
     }
 
     public function wp_enqueue_scripts() {
         $settings = $this->settings_obj->get_settings();
         $current_lang = $this->settings_obj->get_current_language();
+
+        /* Check default settings */
+        if(empty($settings) || !is_array($settings) || isset($settings['enable_banner']) && $settings['enable_banner'] == '0'){
+            return;
+        }
+
         /* Front Style */
         wp_register_style('wputarteaucitron_front_style', plugins_url('assets/front.css', __FILE__), array(), $this->plugin_version);
         wp_enqueue_style('wputarteaucitron_front_style');
