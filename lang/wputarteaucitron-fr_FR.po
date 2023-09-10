@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: WPU Tarte Au Citron\n"
-"POT-Creation-Date: 2023-09-09 13:12+0200\n"
+"POT-Creation-Date: 2023-09-10 11:09+0200\n"
 "PO-Revision-Date: \n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -25,10 +25,12 @@ msgid "Settings"
 msgstr "Réglages"
 
 #: .././inc/WPUBaseSettings/WPUBaseSettings.php:166
+#: .././wputarteaucitron.php:68 .././wputarteaucitron.php:113
 msgid "No"
 msgstr "Non"
 
 #: .././inc/WPUBaseSettings/WPUBaseSettings.php:166
+#: .././wputarteaucitron.php:68 .././wputarteaucitron.php:113
 msgid "Yes"
 msgstr "Oui"
 
@@ -64,42 +66,76 @@ msgstr "Activer la bannière"
 msgid "Banner will be visible and scripts will be loaded"
 msgstr "La bannière sera visible et les scripts seront chargés"
 
-#: .././wputarteaucitron.php:71
+#: .././wputarteaucitron.php:72
 msgid "Privacy URL"
 msgstr "URL de la page de confidentialité"
 
-#: .././wputarteaucitron.php:78
+#: .././wputarteaucitron.php:79
 msgid "Custom Icon"
 msgstr "Icône personnalisée"
 
-#: .././wputarteaucitron.php:83
+#: .././wputarteaucitron.php:84
 msgid "Icon position"
 msgstr "Position de l'icône"
 
-#: .././wputarteaucitron.php:94
+#: .././wputarteaucitron.php:87
+msgid "Bottom Right"
+msgstr "En bas à droite"
+
+#: .././wputarteaucitron.php:88
+msgid "Bottom Left"
+msgstr "En bas à gauche"
+
+#: .././wputarteaucitron.php:89
+msgid "Top Right"
+msgstr "En haut à droite"
+
+#: .././wputarteaucitron.php:90
+msgid "Top Left"
+msgstr "En haut à gauche"
+
+#: .././wputarteaucitron.php:95
 msgid "Banner position"
 msgstr "Position de la bannière"
 
-#: .././wputarteaucitron.php:104
+#: .././wputarteaucitron.php:98
+msgid "Bottom"
+msgstr "En bas"
+
+#: .././wputarteaucitron.php:99
+msgid "Middle"
+msgstr "Au milieu"
+
+#: .././wputarteaucitron.php:100
+msgid "Top"
+msgstr "En haut"
+
+#: .././wputarteaucitron.php:105
 msgid "Banner message"
 msgstr "Message de la bannière"
 
-#: .././wputarteaucitron.php:110
+#: .././wputarteaucitron.php:111
 msgid "Display the “Deny All” CTA"
 msgstr "Afficher le CTA « Refuser tout »"
 
-#: .././wputarteaucitron.php:117
+#: .././wputarteaucitron.php:118 .././wputarteaucitron.php:124
+#: .././wputarteaucitron.php:130
+#, php-format
+msgid "Example: %s"
+msgstr "Exemple: %s"
+
+#: .././wputarteaucitron.php:119
 msgid "GTM ID"
 msgstr "GTM ID"
 
-#: .././wputarteaucitron.php:123
+#: .././wputarteaucitron.php:125
 msgid "GA 4 ID"
 msgstr "GA 4 ID"
 
-#: .././wputarteaucitron.php:129
+#: .././wputarteaucitron.php:131
 msgid "Facebook Pixel ID"
 msgstr "Facebook Pixel ID"
 
-#: .././wputarteaucitron.php:134
+#: .././wputarteaucitron.php:136
 msgid "Hubspot API Key"
 msgstr "Clé API Hubspot"

@@ -4,7 +4,7 @@ Plugin Name: WPU Tarte Au Citron
 Plugin URI: https://github.com/WordPressUtilities/wputarteaucitron
 Update URI: https://github.com/WordPressUtilities/wputarteaucitron
 Description: Simple implementation for Tarteaucitron.js
-Version: 0.5.0
+Version: 0.5.1
 Author: Darklg
 Author URI: https://darklg.me/
 Text Domain: wputarteaucitron
@@ -19,7 +19,7 @@ class WPUTarteAuCitron {
     public $plugin_description;
     public $settings_details;
     public $settings;
-    private $plugin_version = '0.5.0';
+    private $plugin_version = '0.5.1';
     private $tarteaucitron_version = '1.14.0';
     private $settings_obj;
     private $plugin_settings = array(
@@ -64,7 +64,8 @@ class WPUTarteAuCitron {
                 'required' => true,
                 'help' => __('Banner will be visible and scripts will be loaded', 'wputarteaucitron'),
                 'default_value' => '1',
-                'type' => 'radio'
+                'type' => 'select',
+                'datas' => array(__('No', 'wputarteaucitron'), __('Yes', 'wputarteaucitron'))
             ),
             'privacy_page_id' => array(
                 'section' => 'settings',
@@ -83,10 +84,10 @@ class WPUTarteAuCitron {
                 'label' => __('Icon position', 'wputarteaucitron'),
                 'type' => 'select',
                 'datas' => array(
-                    'BottomRight' => 'BottomRight',
-                    'BottomLeft' => 'BottomLeft',
-                    'TopRight' => 'TopRight',
-                    'TopLeft' => 'TopLeft'
+                    'BottomRight' => __('Bottom Right', 'wputarteaucitron'),
+                    'BottomLeft' => __('Bottom Left', 'wputarteaucitron'),
+                    'TopRight' => __('Top Right', 'wputarteaucitron'),
+                    'TopLeft' => __('Top Left', 'wputarteaucitron')
                 )
             ),
             'banner_orientation' => array(
@@ -94,9 +95,9 @@ class WPUTarteAuCitron {
                 'label' => __('Banner position', 'wputarteaucitron'),
                 'type' => 'select',
                 'datas' => array(
-                    'bottom' => 'Bottom',
-                    'middle' => 'Middle',
-                    'top' => 'Top'
+                    'bottom' => __('Bottom', 'wputarteaucitron'),
+                    'middle' => __('Middle', 'wputarteaucitron'),
+                    'top' => __('Top', 'wputarteaucitron')
                 )
             ),
             'banner_message' => array(
@@ -108,24 +109,25 @@ class WPUTarteAuCitron {
             'display_deny_all_cta' => array(
                 'section' => 'settings',
                 'label' => __('Display the “Deny All” CTA', 'wputarteaucitron'),
-                'type' => 'select'
+                'type' => 'select',
+                'datas' => array(__('No', 'wputarteaucitron'), __('Yes', 'wputarteaucitron'))
             ),
             'gtm_id' => array(
                 'wputarteaucitron_value' => true,
                 'section' => 'trackers',
-                'help' => 'Example : GTM-1234',
+                'help' => sprintf(__('Example: %s', 'wputarteaucitron'), 'GTM-1234'),
                 'label' => __('GTM ID', 'wputarteaucitron')
             ),
             'ga4_id' => array(
                 'wputarteaucitron_value' => true,
                 'section' => 'trackers',
-                'help' => 'Example : G-XXXXXXXXX',
+                'help' => sprintf(__('Example: %s', 'wputarteaucitron'), 'G-XXXXXXXXX'),
                 'label' => __('GA 4 ID', 'wputarteaucitron')
             ),
             'fbpix_id' => array(
                 'wputarteaucitron_value' => true,
                 'section' => 'trackers',
-                'help' => 'Example : 123487593',
+                'help' => sprintf(__('Example: %s', 'wputarteaucitron'), '123487593'),
                 'label' => __('Facebook Pixel ID', 'wputarteaucitron')
             ),
             'hubspot_api_key' => array(
@@ -143,7 +145,7 @@ class WPUTarteAuCitron {
         $current_lang = $this->settings_obj->get_current_language();
 
         /* Check default settings */
-        if(empty($settings) || !is_array($settings) || isset($settings['enable_banner']) && $settings['enable_banner'] == '0'){
+        if (empty($settings) || !is_array($settings) || isset($settings['enable_banner']) && $settings['enable_banner'] == '0') {
             return;
         }
 
