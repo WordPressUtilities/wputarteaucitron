@@ -2,6 +2,25 @@
 
     'use strict';
 
+    var _services = {
+        'googletagmanager': {
+            'setting_key': 'gtm_id',
+            'user_key': 'googletagmanagerId'
+        },
+        'gtag': {
+            'setting_key': 'ga4_id',
+            'user_key': 'gtagUa'
+        },
+        'facebookpixel': {
+            'setting_key': 'fbpix_id',
+            'user_key': 'facebookpixelId'
+        },
+        'hubspot': {
+            'setting_key': 'hubspot_api_key',
+            'user_key': 'hubspotId'
+        },
+    };
+
     /* ----------------------------------------------------------
       Settings
     ---------------------------------------------------------- */
@@ -55,27 +74,45 @@
 
     tarteaucitron.job = tarteaucitron.job || [];
 
-    /* GTM */
-    if (wputarteaucitron_settings.gtm_id) {
-        tarteaucitron.user.googletagmanagerId = wputarteaucitron_settings.gtm_id;
-        tarteaucitron.job.push('googletagmanager');
+    for (var _service in _services) {
+        wputarteaucitron_init_service(_service, _services[_service]);
     }
 
-    /* GA 4 */
-    if (wputarteaucitron_settings.ga4_id) {
-        tarteaucitron.user.gtagUa = wputarteaucitron_settings.ga4_id;
-        tarteaucitron.job.push('gtag');
-    }
-
-    /* Facebook Pixel */
-    if (wputarteaucitron_settings.fbpix_id) {
-        tarteaucitron.user.facebookpixelId = wputarteaucitron_settings.fbpix_id;
-        tarteaucitron.job.push('facebookpixel');
-    }
-
-    /* Hubspot */
-    if (wputarteaucitron_settings.hubspot_api_key) {
-        tarteaucitron.user.hubspotId = wputarteaucitron_settings.hubspot_api_key;
-        (tarteaucitron.job = tarteaucitron.job || []).push('hubspot');
-    }
 }());
+
+/* ----------------------------------------------------------
+  Set service
+---------------------------------------------------------- */
+
+function wputarteaucitron_init_service(_id, _details) {
+
+    if (wputarteaucitron_settings[_details.setting_key]) {
+        tarteaucitron.user[_details.user_key] = wputarteaucitron_settings[_details.setting_key];
+        tarteaucitron.job.push(_id);
+    }
+
+    /* When service is enabled */
+    function loaded_service() {
+        var _iframes = document.querySelectorAll('[data-src][data-wputarteaucitron-service="' + _id + '"]');
+        /* Load iframes */
+        Array.prototype.forEach.call(_iframes, function(el, i) {
+            el.setAttribute('src', el.getAttribute('data-src'));
+        });
+        /* Set body attr */
+        document.body.setAttribute('data-wputarteaucitron-service-' + _id, '1');
+    }
+    document.addEventListener(_id + '_loaded', loaded_service, 1);
+    document.addEventListener(_id + '_allowed', loaded_service, 1);
+
+    /* When service is not enabled */
+    document.addEventListener(_id + '_disallowed', function() {
+        /* Unload iframes */
+        var _iframes = document.querySelectorAll('[src][data-wputarteaucitron-service="' + _id + '"]');
+        Array.prototype.forEach.call(_iframes, function(el, i) {
+            el.setAttribute('data-src', el.getAttribute('src'));
+            el.removeAttribute('src');
+        });
+        /* Unset body attr */
+        document.body.setAttribute('data-wputarteaucitron-service-' + _id, '0');
+    }, 1);
+}
