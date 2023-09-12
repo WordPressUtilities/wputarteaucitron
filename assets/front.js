@@ -85,9 +85,11 @@
 ---------------------------------------------------------- */
 
 function wputarteaucitron_init_service(_id, _details) {
-
+    'use strict';
     if (wputarteaucitron_settings[_details.setting_key]) {
-        tarteaucitron.user[_details.user_key] = wputarteaucitron_settings[_details.setting_key];
+        if (_details.user_key) {
+            tarteaucitron.user[_details.user_key] = wputarteaucitron_settings[_details.setting_key];
+        }
         tarteaucitron.job.push(_id);
     }
 
@@ -95,7 +97,7 @@ function wputarteaucitron_init_service(_id, _details) {
     function loaded_service() {
         var _iframes = document.querySelectorAll('[data-src][data-wputarteaucitron-service="' + _id + '"]');
         /* Load iframes */
-        Array.prototype.forEach.call(_iframes, function(el, i) {
+        Array.prototype.forEach.call(_iframes, function(el) {
             el.setAttribute('src', el.getAttribute('data-src'));
         });
         /* Set body attr */
@@ -108,7 +110,7 @@ function wputarteaucitron_init_service(_id, _details) {
     document.addEventListener(_id + '_disallowed', function() {
         /* Unload iframes */
         var _iframes = document.querySelectorAll('[src][data-wputarteaucitron-service="' + _id + '"]');
-        Array.prototype.forEach.call(_iframes, function(el, i) {
+        Array.prototype.forEach.call(_iframes, function(el) {
             el.setAttribute('data-src', el.getAttribute('src'));
             el.removeAttribute('src');
         });
