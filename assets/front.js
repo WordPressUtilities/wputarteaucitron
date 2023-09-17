@@ -2,24 +2,7 @@
 
     'use strict';
 
-    var _services = {
-        'googletagmanager': {
-            'setting_key': 'gtm_id',
-            'user_key': 'googletagmanagerId'
-        },
-        'gtag': {
-            'setting_key': 'ga4_id',
-            'user_key': 'gtagUa'
-        },
-        'facebookpixel': {
-            'setting_key': 'fbpix_id',
-            'user_key': 'facebookpixelId'
-        },
-        'hubspot': {
-            'setting_key': 'hubspot_api_key',
-            'user_key': 'hubspotId'
-        },
-    };
+    var _services = wputarteaucitron_settings.services;
 
     /* ----------------------------------------------------------
       Settings
@@ -77,6 +60,31 @@
     for (var _service in _services) {
         wputarteaucitron_init_service(_service, _services[_service]);
     }
+
+    /* ----------------------------------------------------------
+      Watch events
+    ---------------------------------------------------------- */
+
+    document.body.addEventListener('click', function(e) {
+        var target = e.target;
+
+        while (target !== null && target !== document.body) {
+            var key_allow = target.getAttribute('data-wputarteaucitron-allow-service');
+            if (key_allow) {
+                e.preventDefault();
+                tarteaucitron.sendEvent(key_allow + '_allowed');
+                break;
+            }
+            var key_disallow = target.getAttribute('data-wputarteaucitron-disallow-service');
+            if (key_disallow) {
+                e.preventDefault();
+                tarteaucitron.sendEvent(key_disallow + '_disallowed');
+                break;
+            }
+
+            target = target.parentNode;
+        }
+    });
 
 }());
 

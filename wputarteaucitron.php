@@ -4,7 +4,7 @@ Plugin Name: WPU Tarte Au Citron
 Plugin URI: https://github.com/WordPressUtilities/wputarteaucitron
 Update URI: https://github.com/WordPressUtilities/wputarteaucitron
 Description: Simple implementation for Tarteaucitron.js
-Version: 0.6.1
+Version: 0.7.0
 Author: Darklg
 Author URI: https://darklg.me/
 Text Domain: wputarteaucitron
@@ -19,7 +19,7 @@ class WPUTarteAuCitron {
     public $plugin_description;
     public $settings_details;
     public $settings;
-    private $plugin_version = '0.6.1';
+    private $plugin_version = '0.7.0';
     private $tarteaucitron_version = '1.14.0';
     private $settings_obj;
     private $plugin_settings = array(
@@ -136,6 +136,7 @@ class WPUTarteAuCitron {
                 'label' => __('Hubspot API Key', 'wputarteaucitron')
             )
         );
+        $this->settings = apply_filters('wputarteaucitron__settings', $this->settings);
         require_once dirname(__FILE__) . '/inc/WPUBaseSettings/WPUBaseSettings.php';
         $this->settings_obj = new \wputarteaucitron\WPUBaseSettings($this->settings_details, $this->settings);
     }
@@ -191,6 +192,25 @@ class WPUTarteAuCitron {
             }
             $script_settings[$key] = $settings[$key];
         }
+
+        $script_settings['services'] = array(
+            'googletagmanager' => array(
+                'setting_key' => 'gtm_id',
+                'user_key' => 'googletagmanagerId'
+            ),
+            'gtag' => array(
+                'setting_key' => 'ga4_id',
+                'user_key' => 'gtagUa'
+            ),
+            'facebookpixel' => array(
+                'setting_key' => 'fbpix_id',
+                'user_key' => 'facebookpixelId'
+            ),
+            'hubspot' => array(
+                'setting_key' => 'hubspot_api_key',
+                'user_key' => 'hubspotId'
+            )
+        );
 
         $script_settings = apply_filters('wputarteaucitron__script_settings', $script_settings);
 
