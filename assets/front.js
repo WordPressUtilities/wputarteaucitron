@@ -81,6 +81,18 @@
                 tarteaucitron.sendEvent(key_disallow + '_disallowed');
                 break;
             }
+            var key_open_panel = target.getAttribute('data-wputarteaucitron-open-panel');
+            if (key_open_panel) {
+                e.preventDefault();
+                tarteaucitron.userInterface.openPanel();
+                break;
+            }
+            var key_close_panel = target.getAttribute('data-wputarteaucitron-close-panel');
+            if (key_close_panel) {
+                e.preventDefault();
+                tarteaucitron.userInterface.closePanel();
+                break;
+            }
 
             target = target.parentNode;
         }
