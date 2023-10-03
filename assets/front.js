@@ -72,13 +72,13 @@
             var key_allow = target.getAttribute('data-wputarteaucitron-allow-service');
             if (key_allow) {
                 e.preventDefault();
-                tarteaucitron.sendEvent(key_allow + '_allowed');
+                tarteaucitron.userInterface.respond(document.getElementById(key_allow + 'Allowed'), true);
                 break;
             }
             var key_disallow = target.getAttribute('data-wputarteaucitron-disallow-service');
             if (key_disallow) {
                 e.preventDefault();
-                tarteaucitron.sendEvent(key_disallow + '_disallowed');
+                tarteaucitron.userInterface.respond(document.getElementById(key_disallow + 'Denied'), false);
                 break;
             }
             var key_open_panel = target.getAttribute('data-wputarteaucitron-open-panel');
