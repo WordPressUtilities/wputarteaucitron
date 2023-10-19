@@ -4,7 +4,7 @@ Plugin Name: WPU Tarte Au Citron
 Plugin URI: https://github.com/WordPressUtilities/wputarteaucitron
 Update URI: https://github.com/WordPressUtilities/wputarteaucitron
 Description: Simple implementation for Tarteaucitron.js
-Version: 0.7.2
+Version: 0.7.3
 Author: Darklg
 Author URI: https://darklg.me/
 Text Domain: wputarteaucitron
@@ -19,7 +19,7 @@ class WPUTarteAuCitron {
     public $plugin_description;
     public $settings_details;
     public $settings;
-    private $plugin_version = '0.7.2';
+    private $plugin_version = '0.7.3';
     private $tarteaucitron_version = '1.14.0';
     private $settings_obj;
     private $plugin_settings = array(
@@ -44,6 +44,7 @@ class WPUTarteAuCitron {
             # Admin page
             'create_page' => true,
             'plugin_basename' => plugin_basename(__FILE__),
+            'user_cap' => apply_filters('wputarteaucitron__admin__user_cap', 'manage_options'),
             # Default
             'plugin_name' => $this->plugin_settings['name'],
             'plugin_id' => $this->plugin_settings['id'],

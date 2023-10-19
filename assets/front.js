@@ -62,6 +62,15 @@
     }
 
     /* ----------------------------------------------------------
+      Check if banner is visible
+    ---------------------------------------------------------- */
+
+    document.body.setAttribute('data-wputarteaucitron-banner-visible', '1');
+    window.addEventListener('tac.close_alert', function() {
+        document.body.setAttribute('data-wputarteaucitron-banner-visible', '0');
+    });
+
+    /* ----------------------------------------------------------
       Watch events
     ---------------------------------------------------------- */
 
