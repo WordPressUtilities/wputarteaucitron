@@ -4,12 +4,12 @@ Plugin Name: WPU Tarte Au Citron
 Plugin URI: https://github.com/WordPressUtilities/wputarteaucitron
 Update URI: https://github.com/WordPressUtilities/wputarteaucitron
 Description: Simple implementation for Tarteaucitron.js
-Version: 0.7.3
+Version: 0.8.0
 Author: Darklg
 Author URI: https://darklg.me/
 Text Domain: wputarteaucitron
 Domain Path: /lang
-Requires at least: 6.2
+Requires at least: 6.0
 Requires PHP: 8.0
 License: MIT License
 License URI: https://opensource.org/licenses/MIT
@@ -19,7 +19,7 @@ class WPUTarteAuCitron {
     public $plugin_description;
     public $settings_details;
     public $settings;
-    private $plugin_version = '0.7.3';
+    private $plugin_version = '0.8.0';
     private $tarteaucitron_version = '1.14.0';
     private $settings_obj;
     private $plugin_settings = array(
@@ -58,6 +58,9 @@ class WPUTarteAuCitron {
                 )
             )
         );
+
+        $yes_no = array(__('No', 'wputarteaucitron'), __('Yes', 'wputarteaucitron'));
+
         $this->settings = array(
             'enable_banner' => array(
                 'section' => 'settings',
@@ -66,7 +69,7 @@ class WPUTarteAuCitron {
                 'help' => __('Banner will be visible and scripts will be loaded', 'wputarteaucitron'),
                 'default_value' => '1',
                 'type' => 'select',
-                'datas' => array(__('No', 'wputarteaucitron'), __('Yes', 'wputarteaucitron'))
+                'datas' => $yes_no
             ),
             'privacy_page_id' => array(
                 'section' => 'settings',
@@ -79,6 +82,15 @@ class WPUTarteAuCitron {
                 'section' => 'settings',
                 'label' => __('Custom Icon', 'wputarteaucitron'),
                 'type' => 'media'
+            ),
+            'show_icon' => array(
+                'section' => 'settings',
+                'label' => __('Show icon', 'wputarteaucitron'),
+                'required' => true,
+                'help' => sprintf(__('Or create a link to reopen the popup : %s', 'wputarteaucitron'), htmlentities('<a data-wputarteaucitron-open-panel="1" href="#">Cookies</a>')),
+                'default_value' => '1',
+                'type' => 'select',
+                'datas' => $yes_no
             ),
             'icon_position' => array(
                 'section' => 'settings',
@@ -107,11 +119,17 @@ class WPUTarteAuCitron {
                 'lang' => 1,
                 'type' => 'textarea'
             ),
+            'display_accept_all_cta' => array(
+                'section' => 'settings',
+                'label' => __('Display the “Accept All” CTA', 'wputarteaucitron'),
+                'type' => 'select',
+                'datas' => $yes_no
+            ),
             'display_deny_all_cta' => array(
                 'section' => 'settings',
                 'label' => __('Display the “Deny All” CTA', 'wputarteaucitron'),
                 'type' => 'select',
-                'datas' => array(__('No', 'wputarteaucitron'), __('Yes', 'wputarteaucitron'))
+                'datas' => $yes_no
             ),
             'gtm_id' => array(
                 'wputarteaucitron_value' => true,
@@ -173,8 +191,9 @@ class WPUTarteAuCitron {
         }
 
         $script_settings = array(
-            'accept_all_cta' => true,
+            'accept_all_cta' => !isset($settings['display_accept_all_cta']) || $settings['display_accept_all_cta'],
             'deny_all_cta' => isset($settings['display_deny_all_cta']) && $settings['display_deny_all_cta'],
+            'show_icon' => !isset($settings['show_icon']) || $settings['show_icon'],
             'cookie_name' => 'tarteaucitron',
             'hashtag' => '#tarteaucitron',
             'banner_message' => $this->settings_obj->get_setting('banner_message', !!$current_lang),
