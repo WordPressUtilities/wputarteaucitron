@@ -4,7 +4,7 @@ Plugin Name: WPU Tarte Au Citron
 Plugin URI: https://github.com/WordPressUtilities/wputarteaucitron
 Update URI: https://github.com/WordPressUtilities/wputarteaucitron
 Description: Simple implementation for Tarteaucitron.js
-Version: 0.8.0
+Version: 0.9.0
 Author: Darklg
 Author URI: https://darklg.me/
 Text Domain: wputarteaucitron
@@ -19,18 +19,42 @@ class WPUTarteAuCitron {
     public $plugin_description;
     public $settings_details;
     public $settings;
-    private $plugin_version = '0.8.0';
-    private $tarteaucitron_version = '1.14.0';
+    private $plugin_version = '0.9.0';
+    private $tarteaucitron_version = '1.15.0';
     private $settings_obj;
     private $plugin_settings = array(
         'id' => 'wputarteaucitron',
         'name' => 'WPU Tarte Au Citron'
     );
 
+    private $services = array(
+        'googletagmanager' => array(
+            'setting_key' => 'gtm_id',
+            'user_key' => 'googletagmanagerId'
+        ),
+        'gtag' => array(
+            'setting_key' => 'ga4_id',
+            'user_key' => 'gtagUa'
+        ),
+        'facebookpixel' => array(
+            'setting_key' => 'fbpix_id',
+            'user_key' => 'facebookpixelId'
+        ),
+        'hubspot' => array(
+            'setting_key' => 'hubspot_api_key',
+            'user_key' => 'hubspotId'
+        )
+    );
+
     public function __construct() {
         add_filter('plugins_loaded', array(&$this, 'plugins_loaded'));
+
         # Front Assets
         add_action('wp_enqueue_scripts', array(&$this, 'wp_enqueue_scripts'));
+
+        # AJAX
+        add_action('wp_ajax_wputarteaucitron_status', array(&$this, 'callback_ajax'));
+        add_action('wp_ajax_nopriv_wputarteaucitron_status', array(&$this, 'callback_ajax'));
     }
 
     public function plugins_loaded() {
@@ -172,6 +196,7 @@ class WPUTarteAuCitron {
         /* Front Style */
         wp_register_style('wputarteaucitron_front_style', plugins_url('assets/front.css', __FILE__), array(), $this->plugin_version);
         wp_enqueue_style('wputarteaucitron_front_style');
+
         /* Front Script with localization / variables */
         wp_register_script('wputarteaucitron_main', plugins_url('assets/tarteaucitron/tarteaucitron.js', __FILE__), array(), $this->tarteaucitron_version, true);
         wp_register_script('wputarteaucitron_front_script', plugins_url('assets/front.js', __FILE__), array('wputarteaucitron_main'), $this->plugin_version, true);
@@ -191,6 +216,8 @@ class WPUTarteAuCitron {
         }
 
         $script_settings = array(
+            'ajax_url' => admin_url('admin-ajax.php'),
+            'nonce' => wp_create_nonce('wputarteaucitron_nonce'),
             'accept_all_cta' => !isset($settings['display_accept_all_cta']) || $settings['display_accept_all_cta'],
             'deny_all_cta' => isset($settings['display_deny_all_cta']) && $settings['display_deny_all_cta'],
             'show_icon' => !isset($settings['show_icon']) || $settings['show_icon'],
@@ -213,30 +240,34 @@ class WPUTarteAuCitron {
             $script_settings[$key] = $settings[$key];
         }
 
-        $script_settings['services'] = array(
-            'googletagmanager' => array(
-                'setting_key' => 'gtm_id',
-                'user_key' => 'googletagmanagerId'
-            ),
-            'gtag' => array(
-                'setting_key' => 'ga4_id',
-                'user_key' => 'gtagUa'
-            ),
-            'facebookpixel' => array(
-                'setting_key' => 'fbpix_id',
-                'user_key' => 'facebookpixelId'
-            ),
-            'hubspot' => array(
-                'setting_key' => 'hubspot_api_key',
-                'user_key' => 'hubspotId'
-            )
-        );
+        $script_settings['services'] = $this->services;
 
         $script_settings = apply_filters('wputarteaucitron__script_settings', $script_settings);
 
         wp_localize_script('wputarteaucitron_front_script', 'wputarteaucitron_settings', $script_settings);
         wp_enqueue_script('wputarteaucitron_front_script');
     }
+
+    function callback_ajax() {
+        check_ajax_referer('wputarteaucitron_nonce');
+        if (!isset($_POST['status'], $_POST['service']) || !$_POST['service']) {
+            return;
+        }
+
+        if (!isset($this->services[$_POST['service']])) {
+            return;
+        }
+
+        $option_id = 'wputarteaucitron_stat_service_' . $_POST['service'] . '_' . ($_POST['status'] ? 'allowed' : 'disallowed');
+        $option_value = get_option($option_id, 0);
+        if (!$option_value) {
+            $option_value = 0;
+        }
+        update_option($option_id, ++$option_value);
+
+        wp_send_json_success();
+    }
+
 }
 
 $WPUTarteAuCitron = new WPUTarteAuCitron();

@@ -110,6 +110,23 @@
 }());
 
 /* ----------------------------------------------------------
+  Callback AJAX
+---------------------------------------------------------- */
+
+function wputarteaucitron_send_ajax_status(service, status) {
+    jQuery.ajax({
+        url: wputarteaucitron_settings.ajax_url,
+        type: 'post',
+        data: {
+            'action': 'wputarteaucitron_status',
+            'service': service,
+            'status': status,
+            '_ajax_nonce': wputarteaucitron_settings.nonce
+        }
+    });
+}
+
+/* ----------------------------------------------------------
   Set service
 ---------------------------------------------------------- */
 
@@ -134,9 +151,13 @@ function wputarteaucitron_init_service(_id, _details) {
     }
     document.addEventListener(_id + '_loaded', loaded_service, 1);
     document.addEventListener(_id + '_allowed', loaded_service, 1);
+    document.addEventListener(_id + '_allowed', function(){
+        wputarteaucitron_send_ajax_status(_id, '1');
+    }, 1);
 
     /* When service is not enabled */
     document.addEventListener(_id + '_disallowed', function() {
+        wputarteaucitron_send_ajax_status(_id, '0');
         /* Unload iframes */
         var _iframes = document.querySelectorAll('[src][data-wputarteaucitron-service="' + _id + '"]');
         Array.prototype.forEach.call(_iframes, function(el) {
