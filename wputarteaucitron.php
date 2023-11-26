@@ -4,7 +4,7 @@ Plugin Name: WPU Tarte Au Citron
 Plugin URI: https://github.com/WordPressUtilities/wputarteaucitron
 Update URI: https://github.com/WordPressUtilities/wputarteaucitron
 Description: Simple implementation for Tarteaucitron.js
-Version: 0.9.0
+Version: 0.10.0
 Author: Darklg
 Author URI: https://darklg.me/
 Text Domain: wputarteaucitron
@@ -19,7 +19,7 @@ class WPUTarteAuCitron {
     public $plugin_description;
     public $settings_details;
     public $settings;
-    private $plugin_version = '0.9.0';
+    private $plugin_version = '0.10.0';
     private $tarteaucitron_version = '1.15.0';
     private $settings_obj;
     private $plugin_settings = array(
@@ -29,18 +29,22 @@ class WPUTarteAuCitron {
 
     private $services = array(
         'googletagmanager' => array(
+            'label' => 'Google Tag Manager',
             'setting_key' => 'gtm_id',
             'user_key' => 'googletagmanagerId'
         ),
         'gtag' => array(
+            'label' => 'GA 4',
             'setting_key' => 'ga4_id',
             'user_key' => 'gtagUa'
         ),
         'facebookpixel' => array(
+            'label' => 'Facebook Pixel',
             'setting_key' => 'fbpix_id',
             'user_key' => 'facebookpixelId'
         ),
         'hubspot' => array(
+            'label' => 'Hubspot API',
             'setting_key' => 'hubspot_api_key',
             'user_key' => 'hubspotId'
         )
@@ -55,6 +59,9 @@ class WPUTarteAuCitron {
         # AJAX
         add_action('wp_ajax_wputarteaucitron_status', array(&$this, 'callback_ajax'));
         add_action('wp_ajax_nopriv_wputarteaucitron_status', array(&$this, 'callback_ajax'));
+
+        # Admin
+        add_action('wpubasesettings_after_content_settings_page_wputarteaucitron', array(&$this, 'display_stats'));
     }
 
     public function plugins_loaded() {
@@ -179,6 +186,7 @@ class WPUTarteAuCitron {
                 'label' => __('Hubspot API Key', 'wputarteaucitron')
             )
         );
+
         $this->settings = apply_filters('wputarteaucitron__settings', $this->settings);
         require_once dirname(__FILE__) . '/inc/WPUBaseSettings/WPUBaseSettings.php';
         $this->settings_obj = new \wputarteaucitron\WPUBaseSettings($this->settings_details, $this->settings);
@@ -248,6 +256,10 @@ class WPUTarteAuCitron {
         wp_enqueue_script('wputarteaucitron_front_script');
     }
 
+    /* ----------------------------------------------------------
+      AJAX
+    ---------------------------------------------------------- */
+
     function callback_ajax() {
         check_ajax_referer('wputarteaucitron_nonce');
         if (!isset($_POST['status'], $_POST['service']) || !$_POST['service']) {
@@ -266,6 +278,37 @@ class WPUTarteAuCitron {
         update_option($option_id, ++$option_value);
 
         wp_send_json_success();
+    }
+
+    /* ----------------------------------------------------------
+      Stats
+    ---------------------------------------------------------- */
+
+    function display_stats() {
+        echo '<hr />';
+        echo '<div style="max-width:600px">';
+        echo '<h2>' . __('Stats', 'wputarteaucitron') . '</h2>';
+        echo '<table contenteditable class="widefat fixed striped">';
+        echo '<thead>';
+        echo '<tr>';
+        echo '<th></th>';
+        echo '<th>' . __('Accepted', 'wputarteaucitron') . '</th>';
+        echo '<th>' . __('Refused', 'wputarteaucitron') . '</th>';
+        echo '</tr>';
+        echo '</thead>';
+        echo '<tbody>';
+        foreach ($this->services as $key => $infos) {
+            $base_id = 'wputarteaucitron_stat_service_' . $key;
+            $allowed = get_option($base_id . '_allowed');
+            $refused = get_option($base_id . '_allowed');
+            echo '<tr>';
+            echo '<th scope="row">' . $infos['label'] . '</th>';
+            echo '<td>' . $allowed . '</td>';
+            echo '<td>' . $refused . '</td>';
+            echo '</tr>';
+        }
+        echo '</tbody>';
+        echo '</table>';
     }
 
 }
