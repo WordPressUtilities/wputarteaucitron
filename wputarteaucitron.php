@@ -4,7 +4,7 @@ Plugin Name: WPU Tarte Au Citron
 Plugin URI: https://github.com/WordPressUtilities/wputarteaucitron
 Update URI: https://github.com/WordPressUtilities/wputarteaucitron
 Description: Simple implementation for Tarteaucitron.js
-Version: 0.10.0
+Version: 0.11.0
 Author: Darklg
 Author URI: https://darklg.me/
 Text Domain: wputarteaucitron
@@ -19,9 +19,10 @@ class WPUTarteAuCitron {
     public $plugin_description;
     public $settings_details;
     public $settings;
-    private $plugin_version = '0.10.0';
+    private $plugin_version = '0.11.0';
     private $tarteaucitron_version = '1.15.0';
     private $settings_obj;
+    private $prefix_stat = 'wputarteaucitron_stat_';
     private $plugin_settings = array(
         'id' => 'wputarteaucitron',
         'name' => 'WPU Tarte Au Citron'
@@ -61,7 +62,8 @@ class WPUTarteAuCitron {
         add_action('wp_ajax_nopriv_wputarteaucitron_status', array(&$this, 'callback_ajax'));
 
         # Admin
-        add_action('wpubasesettings_after_content_settings_page_wputarteaucitron', array(&$this, 'display_stats'));
+        add_action('wpubasesettings_after_content_settings_page_wputarteaucitron', array(&$this, 'stats_display'));
+        add_action('load-settings_page_wputarteaucitron', array(&$this, 'stats_reset_action'));
     }
 
     public function plugins_loaded() {
@@ -270,12 +272,15 @@ class WPUTarteAuCitron {
             return;
         }
 
-        $option_id = 'wputarteaucitron_stat_service_' . $_POST['service'] . '_' . ($_POST['status'] ? 'allowed' : 'disallowed');
+        $option_id = $this->prefix_stat . 'service_' . $_POST['service'] . '_' . ($_POST['status'] ? 'allowed' : 'disallowed');
         $option_value = get_option($option_id, 0);
         if (!$option_value) {
             $option_value = 0;
         }
-        update_option($option_id, ++$option_value);
+        update_option($option_id, ++$option_value, false);
+
+        /* Update since */
+        $this->stats_get_since();
 
         wp_send_json_success();
     }
@@ -284,7 +289,71 @@ class WPUTarteAuCitron {
       Stats
     ---------------------------------------------------------- */
 
-    function display_stats() {
+    /**
+     * Get stats start date
+     * @param  boolean $reset   Reset start date
+     * @return int              Start date
+     */
+    function stats_get_since($reset = false) {
+        $opt_time = $this->prefix_stat . 'since';
+        $opt_time_val = get_option($opt_time);
+        if (!$opt_time_val || $reset) {
+            $opt_time_val = time();
+            update_option($opt_time, $opt_time_val);
+        }
+        return $opt_time_val;
+    }
+
+    /**
+     * Reset all stats
+     */
+    function stats_reset() {
+        delete_option($this->prefix_stat . 'since');
+        foreach ($this->services as $key => $infos) {
+            $base_id = $this->prefix_stat . 'service_' . $key;
+            delete_option($base_id . '_allowed');
+            delete_option($base_id . '_disallowed');
+        }
+    }
+
+    function stats_reset_action() {
+        if (isset($_POST[$this->prefix_stat . 'nonce']) && wp_verify_nonce($_POST[$this->prefix_stat . 'nonce'], $this->prefix_stat)) {
+            $this->stats_reset();
+        }
+    }
+
+    function stats_display() {
+
+        $table_html = '';
+
+        foreach ($this->services as $key => $infos) {
+            $base_id = $this->prefix_stat . 'service_' . $key;
+            $allowed = get_option($base_id . '_allowed');
+            $refused = get_option($base_id . '_disallowed');
+
+            if (!is_numeric($allowed) && !is_numeric($refused)) {
+                continue;
+            }
+
+            $stat_allowed = '0';
+            $stat_refused = '0';
+            $total = $allowed + $refused;
+            if ($total) {
+                $stat_allowed = number_format($allowed / $total * 100, 2);
+                $stat_refused = number_format($refused / $total * 100, 2);
+            }
+
+            $table_html .= '<tr>';
+            $table_html .= '<th scope="row">' . $infos['label'] . '</th>';
+            $table_html .= '<td>' . $allowed . ' <small>(' . $stat_allowed . '%)</small></td>';
+            $table_html .= '<td>' . $refused . ' <small>(' . $stat_refused . '%)</small></td>';
+            $table_html .= '</tr>';
+        }
+
+        if (!$table_html) {
+            return;
+        }
+
         echo '<hr />';
         echo '<div style="max-width:600px">';
         echo '<h2>' . __('Stats', 'wputarteaucitron') . '</h2>';
@@ -296,19 +365,16 @@ class WPUTarteAuCitron {
         echo '<th>' . __('Refused', 'wputarteaucitron') . '</th>';
         echo '</tr>';
         echo '</thead>';
-        echo '<tbody>';
-        foreach ($this->services as $key => $infos) {
-            $base_id = 'wputarteaucitron_stat_service_' . $key;
-            $allowed = get_option($base_id . '_allowed');
-            $refused = get_option($base_id . '_allowed');
-            echo '<tr>';
-            echo '<th scope="row">' . $infos['label'] . '</th>';
-            echo '<td>' . $allowed . '</td>';
-            echo '<td>' . $refused . '</td>';
-            echo '</tr>';
-        }
-        echo '</tbody>';
+        echo '<tbody>' . $table_html . '</tbody>';
         echo '</table>';
+
+        $since = $this->stats_get_since();
+        $date_format = get_option('date_format') . ', ' . get_option('time_format');
+        echo '<p>' . sprintf(__('Since %s', 'wputarteaucitron'), wp_date($date_format, $since)) . '.</p>';
+        echo '<form action="" method="post">';
+        submit_button(__('Reset stats', 'wputarteaucitron'));
+        echo wp_nonce_field($this->prefix_stat, $this->prefix_stat . 'nonce');
+        echo '</form>';
     }
 
 }
