@@ -4,7 +4,7 @@ Plugin Name: WPU Tarte Au Citron
 Plugin URI: https://github.com/WordPressUtilities/wputarteaucitron
 Update URI: https://github.com/WordPressUtilities/wputarteaucitron
 Description: Simple implementation for Tarteaucitron.js
-Version: 0.11.0
+Version: 0.12.0
 Author: Darklg
 Author URI: https://darklg.me/
 Text Domain: wputarteaucitron
@@ -19,7 +19,7 @@ class WPUTarteAuCitron {
     public $plugin_description;
     public $settings_details;
     public $settings;
-    private $plugin_version = '0.11.0';
+    private $plugin_version = '0.12.0';
     private $tarteaucitron_version = '1.15.0';
     private $settings_obj;
     private $prefix_stat = 'wputarteaucitron_stat_';
@@ -31,21 +31,28 @@ class WPUTarteAuCitron {
     private $services = array(
         'googletagmanager' => array(
             'label' => 'Google Tag Manager',
+            'field_label' => 'GTM ID',
             'setting_key' => 'gtm_id',
-            'user_key' => 'googletagmanagerId'
+            'user_key' => 'googletagmanagerId',
+            'example' => 'GTM-1234'
         ),
         'gtag' => array(
             'label' => 'GA 4',
+            'field_label' => 'GA 4 ID',
             'setting_key' => 'ga4_id',
-            'user_key' => 'gtagUa'
+            'user_key' => 'gtagUa',
+            'example' => 'GTM-1234'
         ),
         'facebookpixel' => array(
             'label' => 'Facebook Pixel',
+            'field_label' => 'Facebook Pixel ID',
             'setting_key' => 'fbpix_id',
-            'user_key' => 'facebookpixelId'
+            'user_key' => 'facebookpixelId',
+            'example' => '123487593'
         ),
         'hubspot' => array(
             'label' => 'Hubspot API',
+            'field_label' => 'Hubspot API key',
             'setting_key' => 'hubspot_api_key',
             'user_key' => 'hubspotId'
         )
@@ -163,35 +170,31 @@ class WPUTarteAuCitron {
                 'label' => __('Display the “Deny All” CTA', 'wputarteaucitron'),
                 'type' => 'select',
                 'datas' => $yes_no
-            ),
-            'gtm_id' => array(
-                'wputarteaucitron_value' => true,
-                'section' => 'trackers',
-                'help' => sprintf(__('Example: %s', 'wputarteaucitron'), 'GTM-1234'),
-                'label' => __('GTM ID', 'wputarteaucitron')
-            ),
-            'ga4_id' => array(
-                'wputarteaucitron_value' => true,
-                'section' => 'trackers',
-                'help' => sprintf(__('Example: %s', 'wputarteaucitron'), 'G-XXXXXXXXX'),
-                'label' => __('GA 4 ID', 'wputarteaucitron')
-            ),
-            'fbpix_id' => array(
-                'wputarteaucitron_value' => true,
-                'section' => 'trackers',
-                'help' => sprintf(__('Example: %s', 'wputarteaucitron'), '123487593'),
-                'label' => __('Facebook Pixel ID', 'wputarteaucitron')
-            ),
-            'hubspot_api_key' => array(
-                'wputarteaucitron_value' => true,
-                'section' => 'trackers',
-                'label' => __('Hubspot API Key', 'wputarteaucitron')
             )
         );
+
+        foreach ($this->services as $key => $service) {
+            $service_setting = array(
+                'lang' => true,
+                'wputarteaucitron_value' => true,
+                'section' => 'trackers',
+                'label' => $service['field_label']
+            );
+            if (isset($service['example'])) {
+                $service_setting['help'] = sprintf(__('Example: %s', 'wputarteaucitron'), $service['example']);
+            }
+            $this->settings[$service['setting_key']] = $service_setting;
+        }
 
         $this->settings = apply_filters('wputarteaucitron__settings', $this->settings);
         require_once dirname(__FILE__) . '/inc/WPUBaseSettings/WPUBaseSettings.php';
         $this->settings_obj = new \wputarteaucitron\WPUBaseSettings($this->settings_details, $this->settings);
+
+        require_once dirname(__FILE__) . '/inc/WPUBaseUpdate/WPUBaseUpdate.php';
+        $this->settings_update = new \wputarteaucitron\WPUBaseUpdate(
+            'WordPressUtilities',
+            'wputarteaucitron',
+            $this->plugin_version);
     }
 
     public function wp_enqueue_scripts() {
