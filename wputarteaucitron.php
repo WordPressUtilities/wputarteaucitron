@@ -4,7 +4,7 @@ Plugin Name: WPU Tarte Au Citron
 Plugin URI: https://github.com/WordPressUtilities/wputarteaucitron
 Update URI: https://github.com/WordPressUtilities/wputarteaucitron
 Description: Simple implementation for Tarteaucitron.js
-Version: 0.12.0
+Version: 0.13.0
 Author: Darklg
 Author URI: https://darklg.me/
 Text Domain: wputarteaucitron
@@ -19,7 +19,7 @@ class WPUTarteAuCitron {
     public $plugin_description;
     public $settings_details;
     public $settings;
-    private $plugin_version = '0.12.0';
+    private $plugin_version = '0.13.0';
     private $tarteaucitron_version = '1.15.0';
     private $settings_obj;
     private $prefix_stat = 'wputarteaucitron_stat_';
@@ -55,6 +55,12 @@ class WPUTarteAuCitron {
             'field_label' => 'Hubspot API key',
             'setting_key' => 'hubspot_api_key',
             'user_key' => 'hubspotId'
+        ),
+        'plausible' => array(
+            'label' => 'Plausible',
+            'field_label' => 'Plausible Domain',
+            'setting_key' => 'plausible_domain',
+            'user_key' => 'plausibleDomain'
         )
     );
 
@@ -70,6 +76,7 @@ class WPUTarteAuCitron {
 
         # Admin
         add_action('wpubasesettings_after_content_settings_page_wputarteaucitron', array(&$this, 'stats_display'));
+        add_action('wpubasesettings_after_content_settings_page_wputarteaucitron', array(&$this, 'info_display'));
         add_action('load-settings_page_wputarteaucitron', array(&$this, 'stats_reset_action'));
     }
 
@@ -348,6 +355,7 @@ class WPUTarteAuCitron {
 
             $table_html .= '<tr>';
             $table_html .= '<th scope="row">' . $infos['label'] . '</th>';
+            $table_html .= '<td>' . $total . '</td>';
             $table_html .= '<td>' . $allowed . ' <small>(' . $stat_allowed . '%)</small></td>';
             $table_html .= '<td>' . $refused . ' <small>(' . $stat_refused . '%)</small></td>';
             $table_html .= '</tr>';
@@ -364,6 +372,7 @@ class WPUTarteAuCitron {
         echo '<thead>';
         echo '<tr>';
         echo '<th></th>';
+        echo '<th>' . __('Total', 'wputarteaucitron') . '</th>';
         echo '<th>' . __('Accepted', 'wputarteaucitron') . '</th>';
         echo '<th>' . __('Refused', 'wputarteaucitron') . '</th>';
         echo '</tr>';
@@ -378,6 +387,11 @@ class WPUTarteAuCitron {
         submit_button(__('Reset stats', 'wputarteaucitron'));
         echo wp_nonce_field($this->prefix_stat, $this->prefix_stat . 'nonce');
         echo '</form>';
+    }
+
+    function info_display(){
+        echo '<hr />';
+        echo '<p><a href="https://github.com/AmauriC/tarteaucitron.js" target="_blank">tarteaucitron.js</a> v' . $this->tarteaucitron_version . '</p>';
     }
 
 }
