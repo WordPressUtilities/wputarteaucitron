@@ -10,10 +10,18 @@ update_wputarto_get_latest_release() {
 }
 
 # Delete old path
-rm -rf "${_SOURCEDIR}assets/tarteaucitron";
+mv "${_SOURCEDIR}assets/tarteaucitron" "${_SOURCEDIR}assets/tarteaucitron_old";
 
 # Clone the new
 git clone --depth 1 --quiet --branch $(update_wputarto_get_latest_release "AmauriC/tarteaucitron.js") https://github.com/AmauriC/tarteaucitron.js.git "${_SOURCEDIR}assets/tarteaucitron" &> /dev/null;
 rm -rf "${_SOURCEDIR}assets/tarteaucitron/.git";
 
-echo "# Tarteaucitron.js is now at the latest version."
+if [[ -f "${_SOURCEDIR}assets/tarteaucitron/tarteaucitron.js" ]];then
+    rm -rf "${_SOURCEDIR}assets/tarteaucitron_old";
+    echo "# Tarteaucitron.js is now at the latest version."
+else
+    rm -rf "${_SOURCEDIR}assets/tarteaucitron";
+    mv "${_SOURCEDIR}assets/tarteaucitron_old" "${_SOURCEDIR}assets/tarteaucitron";
+    echo "# Tarteaucitron.js could not be updated."
+fi;
+
