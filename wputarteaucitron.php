@@ -4,7 +4,7 @@ Plugin Name: WPU Tarte Au Citron
 Plugin URI: https://github.com/WordPressUtilities/wputarteaucitron
 Update URI: https://github.com/WordPressUtilities/wputarteaucitron
 Description: Simple implementation for Tarteaucitron.js
-Version: 0.13.2
+Version: 0.13.3
 Author: Darklg
 Author URI: https://darklg.me/
 Text Domain: wputarteaucitron
@@ -19,7 +19,7 @@ class WPUTarteAuCitron {
     public $plugin_description;
     public $settings_details;
     public $settings;
-    private $plugin_version = '0.13.2';
+    private $plugin_version = '0.13.3';
     private $tarteaucitron_version = '1.15.0';
     private $settings_obj;
     private $prefix_stat = 'wputarteaucitron_stat_';
@@ -262,17 +262,20 @@ class WPUTarteAuCitron {
             $script_settings[$key] = $settings[$key];
         }
 
-        /* Build settings */
-        $script_settings['services'] = array_map(function ($service) {
-            $new_service = array(
+        /* Build settings for services */
+        $script_settings['services'] = array();
+        foreach($this->services as $k => $service){
+            if(!isset($script_settings[$service['setting_key']])){
+                continue;
+            }
+            $script_settings['services'][$k] = array(
                 'setting_key' => $service['setting_key'],
                 'user_key' => $service['user_key'],
             );
-            return $new_service;
-        },$this->services);
+        }
 
         $script_settings = apply_filters('wputarteaucitron__script_settings', $script_settings);
-
+        echo '<pre>' . basename(__FILE__).':'. __LINE__.' / '; var_dump($script_settings); echo '</pre>'; die;
         wp_localize_script('wputarteaucitron_front_script', 'wputarteaucitron_settings', $script_settings);
         wp_enqueue_script('wputarteaucitron_front_script');
     }
