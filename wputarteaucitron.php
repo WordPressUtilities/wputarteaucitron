@@ -4,7 +4,7 @@ Plugin Name: WPU Tarte Au Citron
 Plugin URI: https://github.com/WordPressUtilities/wputarteaucitron
 Update URI: https://github.com/WordPressUtilities/wputarteaucitron
 Description: Simple implementation for Tarteaucitron.js
-Version: 0.13.4
+Version: 0.14.0
 Author: Darklg
 Author URI: https://darklg.me/
 Text Domain: wputarteaucitron
@@ -19,7 +19,7 @@ class WPUTarteAuCitron {
     public $plugin_description;
     public $settings_details;
     public $settings;
-    private $plugin_version = '0.13.4';
+    private $plugin_version = '0.14.0';
     private $tarteaucitron_version = '1.15.0';
     private $settings_obj;
     private $prefix_stat = 'wputarteaucitron_stat_';
@@ -204,6 +204,9 @@ class WPUTarteAuCitron {
             'WordPressUtilities',
             'wputarteaucitron',
             $this->plugin_version);
+
+        /* Admin widget */
+        add_action('wp_dashboard_setup', array(&$this, 'wputarteaucitron_add_dashboard_widget'));
     }
 
     public function wp_enqueue_scripts() {
@@ -264,13 +267,13 @@ class WPUTarteAuCitron {
 
         /* Build settings for services */
         $script_settings['services'] = array();
-        foreach($this->services as $k => $service){
-            if(!isset($script_settings[$service['setting_key']])){
+        foreach ($this->services as $k => $service) {
+            if (!isset($script_settings[$service['setting_key']])) {
                 continue;
             }
             $script_settings['services'][$k] = array(
                 'setting_key' => $service['setting_key'],
-                'user_key' => $service['user_key'],
+                'user_key' => $service['user_key']
             );
         }
 
@@ -343,8 +346,7 @@ class WPUTarteAuCitron {
         }
     }
 
-    function stats_display() {
-
+    function stats_display($mode = 'default') {
         $table_html = '';
 
         foreach ($this->services as $key => $infos) {
@@ -375,10 +377,11 @@ class WPUTarteAuCitron {
         if (!$table_html) {
             return;
         }
-
-        echo '<hr />';
-        echo '<div style="max-width:600px">';
-        echo '<h2>' . __('Stats', 'wputarteaucitron') . '</h2>';
+        if ($mode != 'widget') {
+            echo '<hr />';
+            echo '<div style="max-width:600px">';
+            echo '<h2>' . __('Stats', 'wputarteaucitron') . '</h2>';
+        }
         echo '<table contenteditable class="widefat fixed striped">';
         echo '<thead>';
         echo '<tr>';
@@ -394,15 +397,33 @@ class WPUTarteAuCitron {
         $since = $this->stats_get_since();
         $date_format = get_option('date_format') . ', ' . get_option('time_format');
         echo '<p>' . sprintf(__('Since %s', 'wputarteaucitron'), wp_date($date_format, $since)) . '.</p>';
-        echo '<form action="" method="post">';
-        submit_button(__('Reset stats', 'wputarteaucitron'));
-        echo wp_nonce_field($this->prefix_stat, $this->prefix_stat . 'nonce');
-        echo '</form>';
+        if ($mode != 'widget') {
+            echo '<form action="" method="post">';
+            submit_button(__('Reset stats', 'wputarteaucitron'));
+            echo wp_nonce_field($this->prefix_stat, $this->prefix_stat . 'nonce');
+            echo '</form>';
+            echo '</div>';
+        }
     }
 
     function info_display() {
         echo '<hr />';
         echo '<p><a href="https://github.com/AmauriC/tarteaucitron.js" target="_blank">tarteaucitron.js</a> v' . $this->tarteaucitron_version . '</p>';
+    }
+
+    function wputarteaucitron_add_dashboard_widget() {
+        if (!current_user_can('edit_users')) {
+            return;
+        }
+        wp_add_dashboard_widget(
+            'wputarteaucitron_dashboard_widget',
+            $this->plugin_settings['name'],
+            array(&$this, 'wputarteaucitron_dashboard_widget__content')
+        );
+    }
+
+    function wputarteaucitron_dashboard_widget__content() {
+        $this->stats_display('widget');
     }
 
 }
