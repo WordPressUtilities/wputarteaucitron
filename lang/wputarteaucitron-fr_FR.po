@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: WPU Tarte Au Citron\n"
-"POT-Creation-Date: 2023-11-27 10:47+0100\n"
+"POT-Creation-Date: 2024-02-11 22:09+0100\n"
 "PO-Revision-Date: \n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -12,29 +12,29 @@ msgstr ""
 "X-Poedit-SourceCharset: UTF-8\n"
 "X-Poedit-Basepath: .\n"
 "X-Poedit-KeywordsList: __;_x;_e\n"
-"X-Generator: Poedit 3.4.1\n"
+"X-Generator: Poedit 3.4.2\n"
 "X-Poedit-SearchPath-0: ../.\n"
 "X-Poedit-SearchPathExcluded-0: inc/WPUBaseAdminDatas\n"
 "X-Poedit-SearchPathExcluded-1: inc/WPUBaseSettings\n"
 
-#: .././inc/WPUBaseSettings/WPUBaseSettings.php:136
+#: .././inc/WPUBaseSettings/WPUBaseSettings.php:132
 #: .././inc/WPUBaseSettings/WPUBaseSettings.php:562
 #: .././inc/WPUBaseSettings/WPUBaseSettings.php:569
-#: .././wputarteaucitron.php:87
+#: .././wputarteaucitron.php:102
 msgid "Settings"
 msgstr "Réglages"
 
-#: .././inc/WPUBaseSettings/WPUBaseSettings.php:166
-#: .././wputarteaucitron.php:95
+#: .././inc/WPUBaseSettings/WPUBaseSettings.php:162
+#: .././wputarteaucitron.php:110
 msgid "No"
 msgstr "Non"
 
-#: .././inc/WPUBaseSettings/WPUBaseSettings.php:166
-#: .././wputarteaucitron.php:95
+#: .././inc/WPUBaseSettings/WPUBaseSettings.php:162
+#: .././wputarteaucitron.php:110
 msgid "Yes"
 msgstr "Oui"
 
-#: .././inc/WPUBaseSettings/WPUBaseSettings.php:303
+#: .././inc/WPUBaseSettings/WPUBaseSettings.php:300
 msgid "Settings saved."
 msgstr "Paramètres sauvegardés."
 
@@ -50,126 +50,125 @@ msgstr "Langue"
 msgid "Save"
 msgstr "Sauvegarder"
 
-#: .././wputarteaucitron.php:74
+#: .././wputarteaucitron.php:89
 msgid "Simple implementation for Tarteaucitron.js"
 msgstr "Une implementation simple pour Tarteaucitron.js"
 
-#: .././wputarteaucitron.php:90
+#: .././wputarteaucitron.php:105
 msgid "Trackers"
 msgstr "Trackers"
 
-#: .././wputarteaucitron.php:100
+#: .././wputarteaucitron.php:115
 msgid "Activate banner"
 msgstr "Activer la bannière"
 
-#: .././wputarteaucitron.php:102
+#: .././wputarteaucitron.php:117
 msgid "Banner will be visible and scripts will be loaded"
 msgstr "La bannière sera visible et les scripts seront chargés"
 
-#: .././wputarteaucitron.php:109
+#: .././wputarteaucitron.php:124
 msgid "Privacy URL"
 msgstr "URL de la page de confidentialité"
 
-#: .././wputarteaucitron.php:116
+#: .././wputarteaucitron.php:131
 msgid "Custom Icon"
 msgstr "Icône personnalisée"
 
-#: .././wputarteaucitron.php:121
+#: .././wputarteaucitron.php:136
 msgid "Show icon"
 msgstr "Afficher l’icône"
 
-#: .././wputarteaucitron.php:123
+#: .././wputarteaucitron.php:138
 #, php-format
 msgid "Or create a link to reopen the popup : %s"
 msgstr "Ou créez un lien pour rouvrir le popup : %s"
 
-#: .././wputarteaucitron.php:130
+#: .././wputarteaucitron.php:145
 msgid "Icon position"
 msgstr "Position de l'icône"
 
-#: .././wputarteaucitron.php:133
+#: .././wputarteaucitron.php:148
 msgid "Bottom Right"
 msgstr "En bas à droite"
 
-#: .././wputarteaucitron.php:134
+#: .././wputarteaucitron.php:149
 msgid "Bottom Left"
 msgstr "En bas à gauche"
 
-#: .././wputarteaucitron.php:135
+#: .././wputarteaucitron.php:150
 msgid "Top Right"
 msgstr "En haut à droite"
 
-#: .././wputarteaucitron.php:136
+#: .././wputarteaucitron.php:151
 msgid "Top Left"
 msgstr "En haut à gauche"
 
-#: .././wputarteaucitron.php:141
+#: .././wputarteaucitron.php:156
 msgid "Banner position"
 msgstr "Position de la bannière"
 
-#: .././wputarteaucitron.php:144
+#: .././wputarteaucitron.php:159
 msgid "Bottom"
 msgstr "En bas"
 
-#: .././wputarteaucitron.php:145
+#: .././wputarteaucitron.php:160
 msgid "Middle"
 msgstr "Au milieu"
 
-#: .././wputarteaucitron.php:146
+#: .././wputarteaucitron.php:161
 msgid "Top"
 msgstr "En haut"
 
-#: .././wputarteaucitron.php:151
+#: .././wputarteaucitron.php:166
 msgid "Banner message"
 msgstr "Message de la bannière"
 
-#: .././wputarteaucitron.php:157
+#: .././wputarteaucitron.php:172
 msgid "Display the “Accept All” CTA"
 msgstr "Afficher le CTA « Accepter tout »"
 
-#: .././wputarteaucitron.php:163
+#: .././wputarteaucitron.php:178
 msgid "Display the “Deny All” CTA"
 msgstr "Afficher le CTA « Refuser tout »"
 
-#: .././wputarteaucitron.php:170 .././wputarteaucitron.php:176
-#: .././wputarteaucitron.php:182
+#: .././wputarteaucitron.php:194
 #, php-format
 msgid "Example: %s"
 msgstr "Exemple: %s"
 
-#: .././wputarteaucitron.php:171
-msgid "GTM ID"
-msgstr "GTM ID"
-
-#: .././wputarteaucitron.php:177
-msgid "GA 4 ID"
-msgstr "GA 4 ID"
-
-#: .././wputarteaucitron.php:183
-msgid "Facebook Pixel ID"
-msgstr "Facebook Pixel ID"
-
-#: .././wputarteaucitron.php:188
-msgid "Hubspot API Key"
-msgstr "Clé API Hubspot"
-
-#: .././wputarteaucitron.php:359
+#: .././wputarteaucitron.php:384
 msgid "Stats"
 msgstr "Statistiques"
 
-#: .././wputarteaucitron.php:364
+#: .././wputarteaucitron.php:390
+msgid "Total"
+msgstr "Total"
+
+#: .././wputarteaucitron.php:391
 msgid "Accepted"
 msgstr "Accepté"
 
-#: .././wputarteaucitron.php:365
+#: .././wputarteaucitron.php:392
 msgid "Refused"
 msgstr "Refusé"
 
-#: .././wputarteaucitron.php:373
+#: .././wputarteaucitron.php:400
 #, php-format
 msgid "Since %s"
 msgstr "Depuis le %s"
 
-#: .././wputarteaucitron.php:375
+#: .././wputarteaucitron.php:403
 msgid "Reset stats"
 msgstr "Réinitialiser les statistiques"
+
+#~ msgid "GTM ID"
+#~ msgstr "GTM ID"
+
+#~ msgid "GA 4 ID"
+#~ msgstr "GA 4 ID"
+
+#~ msgid "Facebook Pixel ID"
+#~ msgstr "Facebook Pixel ID"
+
+#~ msgid "Hubspot API Key"
+#~ msgstr "Clé API Hubspot"

@@ -1,10 +1,11 @@
 <?php
+defined('ABSPATH') || die;
 /*
 Plugin Name: WPU Tarte Au Citron
 Plugin URI: https://github.com/WordPressUtilities/wputarteaucitron
 Update URI: https://github.com/WordPressUtilities/wputarteaucitron
 Description: Simple implementation for Tarteaucitron.js
-Version: 0.14.0
+Version: 0.15.0
 Author: Darklg
 Author URI: https://darklg.me/
 Text Domain: wputarteaucitron
@@ -19,8 +20,8 @@ class WPUTarteAuCitron {
     public $plugin_description;
     public $settings_details;
     public $settings;
-    private $plugin_version = '0.14.0';
-    private $tarteaucitron_version = '1.15.0';
+    private $plugin_version = '0.15.0';
+    private $tarteaucitron_version = '1.16.1';
     private $settings_obj;
     private $prefix_stat = 'wputarteaucitron_stat_';
     private $plugin_settings = array(
@@ -196,10 +197,10 @@ class WPUTarteAuCitron {
         }
 
         $this->settings = apply_filters('wputarteaucitron__settings', $this->settings);
-        require_once dirname(__FILE__) . '/inc/WPUBaseSettings/WPUBaseSettings.php';
+        require_once __DIR__ . '/inc/WPUBaseSettings/WPUBaseSettings.php';
         $this->settings_obj = new \wputarteaucitron\WPUBaseSettings($this->settings_details, $this->settings);
 
-        require_once dirname(__FILE__) . '/inc/WPUBaseUpdate/WPUBaseUpdate.php';
+        require_once __DIR__ . '/inc/WPUBaseUpdate/WPUBaseUpdate.php';
         $this->settings_update = new \wputarteaucitron\WPUBaseUpdate(
             'WordPressUtilities',
             'wputarteaucitron',
@@ -223,7 +224,7 @@ class WPUTarteAuCitron {
         wp_enqueue_style('wputarteaucitron_front_style');
 
         /* Front Script with localization / variables */
-        wp_register_script('wputarteaucitron_main', plugins_url('assets/tarteaucitron/tarteaucitron.js', __FILE__), array(), $this->tarteaucitron_version, true);
+        wp_register_script('wputarteaucitron_main', plugins_url('assets/tarteaucitron/tarteaucitron.min.js', __FILE__), array(), $this->tarteaucitron_version, true);
         wp_register_script('wputarteaucitron_front_script', plugins_url('assets/front.js', __FILE__), array('wputarteaucitron_main'), $this->plugin_version, true);
 
         /* Privacy page */

@@ -33,6 +33,8 @@
         "mandatory": true,
     };
 
+    window.tarteaucitronUseMin = true;
+
     /* Custom Icon */
     if (wputarteaucitron_settings.custom_icon) {
         _settings.iconSrc = wputarteaucitron_settings.custom_icon;

@@ -11,3 +11,6 @@ foreach ($options as $opt) {
     delete_option($opt);
     delete_site_option($opt);
 }
+
+global $wpdb;
+$wpdb->query("DELETE FROM $wpdb->options WHERE option_name LIKE 'wputarteaucitron_stat_%'");
