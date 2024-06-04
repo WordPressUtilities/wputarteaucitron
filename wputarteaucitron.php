@@ -5,23 +5,25 @@ Plugin Name: WPU Tarte Au Citron
 Plugin URI: https://github.com/WordPressUtilities/wputarteaucitron
 Update URI: https://github.com/WordPressUtilities/wputarteaucitron
 Description: Simple implementation for Tarteaucitron.js
-Version: 0.15.0
+Version: 0.16.0
 Author: Darklg
 Author URI: https://darklg.me/
 Text Domain: wputarteaucitron
 Domain Path: /lang
-Requires at least: 6.0
+Requires at least: 6.2
 Requires PHP: 8.0
+Network: Optional
 License: MIT License
 License URI: https://opensource.org/licenses/MIT
 */
 
 class WPUTarteAuCitron {
+    public $settings_update;
     public $plugin_description;
     public $settings_details;
     public $settings;
-    private $plugin_version = '0.15.0';
-    private $tarteaucitron_version = '1.16.1';
+    private $plugin_version = '0.16.0';
+    private $tarteaucitron_version = '1.18.0';
     private $settings_obj;
     private $prefix_stat = 'wputarteaucitron_stat_';
     private $plugin_settings = array(
@@ -297,12 +299,26 @@ class WPUTarteAuCitron {
             return;
         }
 
-        $option_id = $this->prefix_stat . 'service_' . $_POST['service'] . '_' . ($_POST['status'] ? 'allowed' : 'disallowed');
-        $option_value = get_option($option_id, 0);
-        if (!$option_value) {
-            $option_value = 0;
+        $service_key = esc_sql($_POST['service']);
+
+        /* Bypassing option API to avoid cache problems */
+        global $wpdb;
+        $option_id = $this->prefix_stat . 'service_' . $service_key . '_' . ($_POST['status'] ? 'allowed' : 'disallowed');
+        $option_value = $wpdb->get_var($wpdb->prepare("SELECT option_value FROM $wpdb->options WHERE option_name = %s", $option_id));
+        if (!is_numeric($option_value)) {
+            $wpdb->insert($wpdb->options, array(
+                'option_name' => $option_id,
+                'option_value' => 1,
+                'autoload' => 'no'
+            ));
+        } else {
+            $wpdb->update($wpdb->options, array(
+                'option_value' => intval($option_value) + 1,
+                'autoload' => 'no'
+            ), array(
+                'option_name' => $option_id
+            ));
         }
-        update_option($option_id, ++$option_value, false);
 
         /* Update since */
         $this->stats_get_since();
