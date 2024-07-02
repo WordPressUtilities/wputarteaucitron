@@ -5,7 +5,7 @@ Plugin Name: WPU Tarte Au Citron
 Plugin URI: https://github.com/WordPressUtilities/wputarteaucitron
 Update URI: https://github.com/WordPressUtilities/wputarteaucitron
 Description: Simple implementation for Tarteaucitron.js
-Version: 0.16.1
+Version: 0.17.0
 Author: Darklg
 Author URI: https://darklg.me/
 Text Domain: wputarteaucitron
@@ -22,8 +22,8 @@ class WPUTarteAuCitron {
     public $plugin_description;
     public $settings_details;
     public $settings;
-    private $plugin_version = '0.16.1';
-    private $tarteaucitron_version = '1.18.0';
+    private $plugin_version = '0.17.0';
+    private $tarteaucitron_version = '1.19.0';
     private $settings_obj;
     private $prefix_stat = 'wputarteaucitron_stat_';
     private $plugin_settings = array(
@@ -118,6 +118,15 @@ class WPUTarteAuCitron {
                 'required' => true,
                 'help' => __('Banner will be visible and scripts will be loaded', 'wputarteaucitron'),
                 'default_value' => '1',
+                'type' => 'select',
+                'datas' => $yes_no
+            ),
+            'disable_banner_loggedin' => array(
+                'section' => 'settings',
+                'label' => __('Disable banner for logged in users', 'wputarteaucitron'),
+                'required' => true,
+                'help' => __('Banner will be visible only for non-logged in users', 'wputarteaucitron'),
+                'default_value' => '0',
                 'type' => 'select',
                 'datas' => $yes_no
             ),
@@ -221,6 +230,10 @@ class WPUTarteAuCitron {
             return;
         }
 
+        if(isset($settings['disable_banner_loggedin']) && $settings['disable_banner_loggedin'] == '1' && is_user_logged_in()) {
+            return;
+        }
+
         /* Front Style */
         wp_register_style('wputarteaucitron_front_style', plugins_url('assets/front.css', __FILE__), array(), $this->plugin_version);
         wp_enqueue_style('wputarteaucitron_front_style');
@@ -289,7 +302,7 @@ class WPUTarteAuCitron {
       AJAX
     ---------------------------------------------------------- */
 
-    function callback_ajax() {
+    public function callback_ajax() {
         check_ajax_referer('wputarteaucitron_nonce');
         if (!isset($_POST['status'], $_POST['service']) || !$_POST['service']) {
             return;
@@ -335,7 +348,7 @@ class WPUTarteAuCitron {
      * @param  boolean $reset   Reset start date
      * @return int              Start date
      */
-    function stats_get_since($reset = false) {
+    public function stats_get_since($reset = false) {
         $opt_time = $this->prefix_stat . 'since';
         $opt_time_val = get_option($opt_time);
         if (!$opt_time_val || $reset) {
@@ -348,7 +361,7 @@ class WPUTarteAuCitron {
     /**
      * Reset all stats
      */
-    function stats_reset() {
+    public function stats_reset() {
         delete_option($this->prefix_stat . 'since');
         foreach ($this->services as $key => $infos) {
             $base_id = $this->prefix_stat . 'service_' . $key;
@@ -357,13 +370,13 @@ class WPUTarteAuCitron {
         }
     }
 
-    function stats_reset_action() {
+    public function stats_reset_action() {
         if (isset($_POST[$this->prefix_stat . 'nonce']) && wp_verify_nonce($_POST[$this->prefix_stat . 'nonce'], $this->prefix_stat)) {
             $this->stats_reset();
         }
     }
 
-    function stats_display($mode = 'default') {
+    public function stats_display($mode = 'default') {
         $table_html = '';
 
         foreach ($this->services as $key => $infos) {
@@ -423,12 +436,12 @@ class WPUTarteAuCitron {
         }
     }
 
-    function info_display() {
+    public function info_display() {
         echo '<hr />';
         echo '<p><a href="https://github.com/AmauriC/tarteaucitron.js" target="_blank">tarteaucitron.js</a> v' . $this->tarteaucitron_version . '</p>';
     }
 
-    function wputarteaucitron_add_dashboard_widget() {
+    public function wputarteaucitron_add_dashboard_widget() {
         if (!current_user_can('edit_users')) {
             return;
         }
@@ -439,7 +452,7 @@ class WPUTarteAuCitron {
         );
     }
 
-    function wputarteaucitron_dashboard_widget__content() {
+    public function wputarteaucitron_dashboard_widget__content() {
         $this->stats_display('widget');
     }
 
