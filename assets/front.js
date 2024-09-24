@@ -132,12 +132,22 @@ function wputarteaucitron_send_ajax_status(service, status) {
   Set service
 ---------------------------------------------------------- */
 
+function wputarteaucitron_init_service__add_user_key(_details) {
+    if (_details.user_key) {
+        tarteaucitron.user[_details.user_key] = wputarteaucitron_settings[_details.setting_key];
+    }
+}
+
 function wputarteaucitron_init_service(_id, _details) {
     'use strict';
+
     if (wputarteaucitron_settings[_details.setting_key]) {
-        if (_details.user_key) {
-            tarteaucitron.user[_details.user_key] = wputarteaucitron_settings[_details.setting_key];
+        if (_details.extra) {
+            Object.keys(_details.extra).forEach(function(key) {
+                wputarteaucitron_init_service__add_user_key(_details.extra[key]);
+            });
         }
+        wputarteaucitron_init_service__add_user_key(_details);
         tarteaucitron.job.push(_id);
     }
 
@@ -153,7 +163,7 @@ function wputarteaucitron_init_service(_id, _details) {
     }
     document.addEventListener(_id + '_loaded', loaded_service, 1);
     document.addEventListener(_id + '_allowed', loaded_service, 1);
-    document.addEventListener(_id + '_allowed', function(){
+    document.addEventListener(_id + '_allowed', function() {
         wputarteaucitron_send_ajax_status(_id, '1');
     }, 1);
 

@@ -5,7 +5,7 @@ Plugin Name: WPU Tarte Au Citron
 Plugin URI: https://github.com/WordPressUtilities/wputarteaucitron
 Update URI: https://github.com/WordPressUtilities/wputarteaucitron
 Description: Simple implementation for Tarteaucitron.js
-Version: 0.17.0
+Version: 0.18.0
 Author: Darklg
 Author URI: https://darklg.me/
 Text Domain: wputarteaucitron
@@ -22,7 +22,7 @@ class WPUTarteAuCitron {
     public $plugin_description;
     public $settings_details;
     public $settings;
-    private $plugin_version = '0.17.0';
+    private $plugin_version = '0.18.0';
     private $tarteaucitron_version = '1.19.0';
     private $settings_obj;
     private $prefix_stat = 'wputarteaucitron_stat_';
@@ -64,6 +64,24 @@ class WPUTarteAuCitron {
             'field_label' => 'Plausible Domain',
             'setting_key' => 'plausible_domain',
             'user_key' => 'plausibleDomain'
+        ),
+        'matomocloud' => array(
+            'label' => 'Matomo',
+            'field_label' => 'Matomo ID',
+            'setting_key' => 'matomocloud_id',
+            'user_key' => 'matomoId',
+            'extra_settings' => array(
+                'matomo_host' => array(
+                    'label' => 'Matomo Host',
+                    'setting_key' => 'matomocloud_host',
+                    'user_key' => 'matomoHost'
+                ),
+                'matomo_jspath' => array(
+                    'label' => 'Matomo JS Path',
+                    'setting_key' => 'matomocloud_jspath',
+                    'user_key' => 'matomoCustomJSPath'
+                )
+            )
         )
     );
 
@@ -201,10 +219,25 @@ class WPUTarteAuCitron {
                 'section' => 'trackers',
                 'label' => $service['field_label']
             );
+            if(isset($service['help'])) {
+                $service_setting['help'] = $service['help'];
+            }
             if (isset($service['example'])) {
                 $service_setting['help'] = sprintf(__('Example: %s', 'wputarteaucitron'), $service['example']);
             }
             $this->settings[$service['setting_key']] = $service_setting;
+
+            if(isset($service['extra_settings'])) {
+                foreach ($service['extra_settings'] as $extra_key => $extra_settings) {
+                    $item_settings = array(
+                        'lang' => true,
+                        'wputarteaucitron_value' => true,
+                        'section' => 'trackers',
+                        'label' => $extra_settings['label']
+                    );
+                    $this->settings[$extra_settings['setting_key']] = $item_settings;
+                }
+            }
         }
 
         $this->settings = apply_filters('wputarteaucitron__settings', $this->settings);
@@ -291,6 +324,20 @@ class WPUTarteAuCitron {
                 'setting_key' => $service['setting_key'],
                 'user_key' => $service['user_key']
             );
+            if(isset($service['extra_settings'])) {
+                foreach ($service['extra_settings'] as $extra_key => $extra_settings) {
+                    if (!isset($script_settings[$extra_settings['setting_key']])) {
+                        continue;
+                    }
+                    if(!isset($script_settings['services'][$k]['extra'])){
+                        $script_settings['services'][$k]['extra'] = array();
+                    }
+                    $script_settings['services'][$k]['extra'][$extra_key] = array(
+                        'setting_key' => $extra_settings['setting_key'],
+                        'user_key' => $extra_settings['user_key']
+                    );
+                }
+            }
         }
 
         $script_settings = apply_filters('wputarteaucitron__script_settings', $script_settings);
