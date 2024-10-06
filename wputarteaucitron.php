@@ -5,7 +5,7 @@ Plugin Name: WPU Tarte Au Citron
 Plugin URI: https://github.com/WordPressUtilities/wputarteaucitron
 Update URI: https://github.com/WordPressUtilities/wputarteaucitron
 Description: Simple implementation for Tarteaucitron.js
-Version: 0.18.0
+Version: 0.18.1
 Author: Darklg
 Author URI: https://darklg.me/
 Text Domain: wputarteaucitron
@@ -22,7 +22,7 @@ class WPUTarteAuCitron {
     public $plugin_description;
     public $settings_details;
     public $settings;
-    private $plugin_version = '0.18.0';
+    private $plugin_version = '0.18.1';
     private $tarteaucitron_version = '1.19.0';
     private $settings_obj;
     private $prefix_stat = 'wputarteaucitron_stat_';
@@ -219,7 +219,7 @@ class WPUTarteAuCitron {
                 'section' => 'trackers',
                 'label' => $service['field_label']
             );
-            if(isset($service['help'])) {
+            if (isset($service['help'])) {
                 $service_setting['help'] = $service['help'];
             }
             if (isset($service['example'])) {
@@ -227,7 +227,7 @@ class WPUTarteAuCitron {
             }
             $this->settings[$service['setting_key']] = $service_setting;
 
-            if(isset($service['extra_settings'])) {
+            if (isset($service['extra_settings'])) {
                 foreach ($service['extra_settings'] as $extra_key => $extra_settings) {
                     $item_settings = array(
                         'lang' => true,
@@ -263,7 +263,7 @@ class WPUTarteAuCitron {
             return;
         }
 
-        if(isset($settings['disable_banner_loggedin']) && $settings['disable_banner_loggedin'] == '1' && is_user_logged_in()) {
+        if (isset($settings['disable_banner_loggedin']) && $settings['disable_banner_loggedin'] == '1' && is_user_logged_in()) {
             return;
         }
 
@@ -324,12 +324,12 @@ class WPUTarteAuCitron {
                 'setting_key' => $service['setting_key'],
                 'user_key' => $service['user_key']
             );
-            if(isset($service['extra_settings'])) {
+            if (isset($service['extra_settings'])) {
                 foreach ($service['extra_settings'] as $extra_key => $extra_settings) {
                     if (!isset($script_settings[$extra_settings['setting_key']])) {
                         continue;
                     }
-                    if(!isset($script_settings['services'][$k]['extra'])){
+                    if (!isset($script_settings['services'][$k]['extra'])) {
                         $script_settings['services'][$k]['extra'] = array();
                     }
                     $script_settings['services'][$k]['extra'][$extra_key] = array(
@@ -500,7 +500,15 @@ class WPUTarteAuCitron {
     }
 
     public function wputarteaucitron_dashboard_widget__content() {
+        ob_start();
         $this->stats_display('widget');
+        $out = ob_get_clean();
+
+        if (!$out) {
+            echo '<p>' . __('No stats yet.', 'wputarteaucitron') . '</p>';
+        } else {
+            echo $out;
+        }
     }
 
 }
