@@ -5,7 +5,7 @@ Plugin Name: WPU Tarte Au Citron
 Plugin URI: https://github.com/WordPressUtilities/wputarteaucitron
 Update URI: https://github.com/WordPressUtilities/wputarteaucitron
 Description: Simple implementation for Tarteaucitron.js
-Version: 0.18.2
+Version: 0.19.0
 Author: Darklg
 Author URI: https://darklg.me/
 Text Domain: wputarteaucitron
@@ -22,7 +22,7 @@ class WPUTarteAuCitron {
     public $plugin_description;
     public $settings_details;
     public $settings;
-    private $plugin_version = '0.18.2';
+    private $plugin_version = '0.19.0';
     private $tarteaucitron_version = '1.19.0';
     private $settings_obj;
     private $prefix_stat = 'wputarteaucitron_stat_';
@@ -86,7 +86,8 @@ class WPUTarteAuCitron {
     );
 
     public function __construct() {
-        add_filter('plugins_loaded', array(&$this, 'plugins_loaded'));
+        add_filter('init', array(&$this, 'load_translation'));
+        add_filter('init', array(&$this, 'init'));
 
         # Front Assets
         add_action('wp_enqueue_scripts', array(&$this, 'wp_enqueue_scripts'));
@@ -101,12 +102,18 @@ class WPUTarteAuCitron {
         add_action('load-settings_page_wputarteaucitron', array(&$this, 'stats_reset_action'));
     }
 
-    public function plugins_loaded() {
-        # TRANSLATION
-        if (!load_plugin_textdomain('wputarteaucitron', false, dirname(plugin_basename(__FILE__)) . '/lang/')) {
-            load_muplugin_textdomain('wputarteaucitron', dirname(plugin_basename(__FILE__)) . '/lang/');
+    public function load_translation() {
+        $lang_dir = dirname(plugin_basename(__FILE__)) . '/lang/';
+        if (strpos(__DIR__, 'mu-plugins') !== false) {
+            load_muplugin_textdomain('wputarteaucitron', $lang_dir);
+        } else {
+            load_plugin_textdomain('wputarteaucitron', false, $lang_dir);
         }
         $this->plugin_description = __('Simple implementation for Tarteaucitron.js', 'wputarteaucitron');
+    }
+
+    public function init() {
+
         # SETTINGS
         $this->settings_details = array(
             # Admin page
