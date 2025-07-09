@@ -5,7 +5,7 @@ Plugin Name: WPU Tarte Au Citron
 Plugin URI: https://github.com/WordPressUtilities/wputarteaucitron
 Update URI: https://github.com/WordPressUtilities/wputarteaucitron
 Description: Simple implementation for Tarteaucitron.js
-Version: 0.19.1
+Version: 0.20.0
 Author: Darklg
 Author URI: https://darklg.me/
 Text Domain: wputarteaucitron
@@ -22,8 +22,8 @@ class WPUTarteAuCitron {
     public $plugin_description;
     public $settings_details;
     public $settings;
-    private $plugin_version = '0.19.1';
-    private $tarteaucitron_version = '1.21.0';
+    private $plugin_version = '0.20.0';
+    private $tarteaucitron_version = '1.22.0';
     private $settings_obj;
     private $prefix_stat = 'wputarteaucitron_stat_';
     private $plugin_settings = array(
@@ -44,7 +44,7 @@ class WPUTarteAuCitron {
             'field_label' => 'GA 4 ID',
             'setting_key' => 'ga4_id',
             'user_key' => 'gtagUa',
-            'example' => 'GTM-1234'
+            'example' => 'G-12345678'
         ),
         'facebookpixel' => array(
             'label' => 'Facebook Pixel',
@@ -58,6 +58,22 @@ class WPUTarteAuCitron {
             'field_label' => 'Hubspot API key',
             'setting_key' => 'hubspot_api_key',
             'user_key' => 'hubspotId'
+        ),
+        'hotjar' => array(
+            'label' => 'Hotjar',
+            'field_label' => 'Hotjar ID',
+            'setting_key' => 'hotjar_id',
+            'user_key' => 'hotjarId',
+            'example' => '1234567',
+            'extra_settings' => array(
+                'hotjar_sv' => array(
+                    'label' => 'Hotjar SV',
+                    'field_label' => 'Hotjar SV',
+                    'setting_key' => 'hotjar_sv',
+                    'user_key' => 'HotjarSv',
+                    'example' => '5'
+                )
+            )
         ),
         'plausible' => array(
             'label' => 'Plausible',
@@ -242,6 +258,9 @@ class WPUTarteAuCitron {
                         'section' => 'trackers',
                         'label' => $extra_settings['label']
                     );
+                    if (isset($extra_settings['example'])) {
+                        $item_settings['help'] = sprintf(__('Example: %s', 'wputarteaucitron'), $extra_settings['example']);
+                    }
                     $this->settings[$extra_settings['setting_key']] = $item_settings;
                 }
             }
