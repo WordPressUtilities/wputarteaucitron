@@ -5,7 +5,7 @@ Plugin Name: WPU Tarte Au Citron
 Plugin URI: https://github.com/WordPressUtilities/wputarteaucitron
 Update URI: https://github.com/WordPressUtilities/wputarteaucitron
 Description: Simple implementation for Tarteaucitron.js
-Version: 0.20.0
+Version: 1.0.0
 Author: Darklg
 Author URI: https://darklg.me/
 Text Domain: wputarteaucitron
@@ -22,8 +22,8 @@ class WPUTarteAuCitron {
     public $plugin_description;
     public $settings_details;
     public $settings;
-    private $plugin_version = '0.20.0';
-    private $tarteaucitron_version = '1.22.0';
+    private $plugin_version = '1.0.0';
+    private $tarteaucitron_version = '1.25.0';
     private $settings_obj;
     private $prefix_stat = 'wputarteaucitron_stat_';
     private $plugin_settings = array(
@@ -32,6 +32,13 @@ class WPUTarteAuCitron {
     );
 
     private $services = array(
+        'googleads' => array(
+            'label' => 'Google Ads',
+            'field_label' => 'Google Ads ID',
+            'setting_key' => 'googleads_id',
+            'user_key' => 'googleadsId',
+            'example' => 'AW-123456789'
+        ),
         'googletagmanager' => array(
             'label' => 'Google Tag Manager',
             'field_label' => 'GTM ID',
@@ -74,6 +81,13 @@ class WPUTarteAuCitron {
                     'example' => '5'
                 )
             )
+        ),
+        'linkedininsighttag' => array(
+            'label' => 'LinkedIn Insight',
+            'field_label' => 'LinkedIn Insight Tag',
+            'setting_key' => 'linkedin_partner_id',
+            'user_key' => 'linkedininsighttag',
+            'example' => '123456'
         ),
         'plausible' => array(
             'label' => 'Plausible',
@@ -235,33 +249,13 @@ class WPUTarteAuCitron {
 
         $this->services = apply_filters('wputarteaucitron__services', $this->services);
 
-        foreach ($this->services as $key => $service) {
-            $service_setting = array(
-                'lang' => true,
-                'wputarteaucitron_value' => true,
-                'section' => 'trackers',
-                'label' => $service['field_label']
-            );
-            if (isset($service['help'])) {
-                $service_setting['help'] = $service['help'];
-            }
-            if (isset($service['example'])) {
-                $service_setting['help'] = sprintf(__('Example: %s', 'wputarteaucitron'), $service['example']);
-            }
+        foreach ($this->services as $service) {
+            $service_setting = $this->get_field_setting($service);
             $this->settings[$service['setting_key']] = $service_setting;
 
             if (isset($service['extra_settings'])) {
-                foreach ($service['extra_settings'] as $extra_key => $extra_settings) {
-                    $item_settings = array(
-                        'lang' => true,
-                        'wputarteaucitron_value' => true,
-                        'section' => 'trackers',
-                        'label' => $extra_settings['label']
-                    );
-                    if (isset($extra_settings['example'])) {
-                        $item_settings['help'] = sprintf(__('Example: %s', 'wputarteaucitron'), $extra_settings['example']);
-                    }
-                    $this->settings[$extra_settings['setting_key']] = $item_settings;
+                foreach ($service['extra_settings'] as $extra_settings) {
+                    $this->settings[$extra_settings['setting_key']] = $this->get_field_setting($extra_settings);
                 }
             }
         }
@@ -278,6 +272,24 @@ class WPUTarteAuCitron {
 
         /* Admin widget */
         add_action('wp_dashboard_setup', array(&$this, 'wputarteaucitron_add_dashboard_widget'));
+    }
+
+    function get_field_setting($args = array()) {
+        $base_setting = array(
+            'lang' => true,
+            'wputarteaucitron_value' => true,
+            'section' => 'trackers'
+        );
+        $item = array_merge($base_setting, array(
+            'label' => $args['label']
+        ));
+        if (isset($args['help'])) {
+            $item['help'] = $args['help'];
+        }
+        if (isset($args['example'])) {
+            $item['help'] = sprintf(__('Example: %s', 'wputarteaucitron'), $args['example']);
+        }
+        return $item;
     }
 
     public function wp_enqueue_scripts() {
@@ -459,6 +471,13 @@ class WPUTarteAuCitron {
 
             if (!is_numeric($allowed) && !is_numeric($refused)) {
                 continue;
+            }
+
+            if (!$allowed) {
+                $allowed = 0;
+            }
+            if (!$refused) {
+                $refused = 0;
             }
 
             $stat_allowed = '0';
