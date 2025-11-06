@@ -77,7 +77,8 @@
     ---------------------------------------------------------- */
 
     document.body.addEventListener('click', function(e) {
-        var target = e.target;
+        var target = e.target,
+            _str_open_panel = 'wputarteaucitron-open-panel';
 
         while (target !== null && target !== document.body) {
             var key_allow = target.getAttribute('data-wputarteaucitron-allow-service');
@@ -92,8 +93,10 @@
                 tarteaucitron.userInterface.respond(document.getElementById(key_disallow + 'Denied'), false);
                 break;
             }
-            var key_open_panel = target.getAttribute('data-wputarteaucitron-open-panel');
-            if (key_open_panel) {
+            var has_class_open_panel = target.classList.contains(_str_open_panel) || target.closest('.' + _str_open_panel);
+            var key_open_panel = target.getAttribute('data-' + _str_open_panel);
+            var href_open_panel = target.getAttribute('href') == '#' + _str_open_panel;
+            if (key_open_panel || has_class_open_panel || href_open_panel) {
                 e.preventDefault();
                 tarteaucitron.userInterface.openPanel();
                 break;
