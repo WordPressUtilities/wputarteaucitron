@@ -24,6 +24,7 @@
         "DenyAllCta": wputarteaucitron_settings.deny_all_cta ? true : false,
         "AcceptAllCta": wputarteaucitron_settings.accept_all_cta ? true : false,
         "highPrivacy": true,
+        "googleConsentMode": wputarteaucitron_settings.disable_google_consent_mode ? false : true,
         "handleBrowserDNTRequest": false,
         "removeCredit": false,
         "moreInfoLink": true,

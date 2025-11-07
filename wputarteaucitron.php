@@ -5,7 +5,7 @@ Plugin Name: WPU Tarte Au Citron
 Plugin URI: https://github.com/WordPressUtilities/wputarteaucitron
 Update URI: https://github.com/WordPressUtilities/wputarteaucitron
 Description: Simple implementation for Tarteaucitron.js
-Version: 1.0.3
+Version: 1.1.0
 Author: Darklg
 Author URI: https://darklg.me/
 Text Domain: wputarteaucitron
@@ -22,7 +22,7 @@ class WPUTarteAuCitron {
     public $plugin_description;
     public $settings_details;
     public $settings;
-    private $plugin_version = '1.0.3';
+    private $plugin_version = '1.1.0';
     private $tarteaucitron_version = '1.26.0';
     private $settings_obj;
     private $prefix_stat = 'wputarteaucitron_stat_';
@@ -33,6 +33,7 @@ class WPUTarteAuCitron {
 
     private $services = array(
         'googleads' => array(
+            'section' => 'trackers_google',
             'label' => 'Google Ads',
             'field_label' => 'Google Ads ID',
             'setting_key' => 'googleads_id',
@@ -40,6 +41,7 @@ class WPUTarteAuCitron {
             'example' => 'AW-123456789'
         ),
         'googletagmanager' => array(
+            'section' => 'trackers_google',
             'label' => 'Google Tag Manager',
             'field_label' => 'GTM ID',
             'setting_key' => 'gtm_id',
@@ -47,6 +49,7 @@ class WPUTarteAuCitron {
             'example' => 'GTM-1234'
         ),
         'gtag' => array(
+            'section' => 'trackers_google',
             'label' => 'GA 4',
             'field_label' => 'GA 4 ID',
             'setting_key' => 'ga4_id',
@@ -158,6 +161,15 @@ class WPUTarteAuCitron {
                 'settings' => array(
                     'name' => __('Settings', 'wputarteaucitron')
                 ),
+                'settings_icon' => array(
+                    'name' => __('Icon', 'wputarteaucitron')
+                ),
+                'settings_banner' => array(
+                    'name' => __('Banner', 'wputarteaucitron')
+                ),
+                'trackers_google' => array(
+                    'name' => __('Trackers - Google', 'wputarteaucitron')
+                ),
                 'trackers' => array(
                     'name' => __('Trackers', 'wputarteaucitron')
                 )
@@ -193,12 +205,12 @@ class WPUTarteAuCitron {
                 'post_type' => 'page'
             ),
             'custom_icon_id' => array(
-                'section' => 'settings',
+                'section' => 'settings_icon',
                 'label' => __('Custom Icon', 'wputarteaucitron'),
                 'type' => 'media'
             ),
             'show_icon' => array(
-                'section' => 'settings',
+                'section' => 'settings_icon',
                 'label' => __('Show icon', 'wputarteaucitron'),
                 'required' => true,
                 'help' => sprintf(__('Or create a link to reopen the popup : %s', 'wputarteaucitron'), htmlentities('<a data-wputarteaucitron-open-panel="1" href="#">Cookies</a>')),
@@ -207,7 +219,7 @@ class WPUTarteAuCitron {
                 'datas' => $yes_no
             ),
             'icon_position' => array(
-                'section' => 'settings',
+                'section' => 'settings_icon',
                 'label' => __('Icon position', 'wputarteaucitron'),
                 'type' => 'select',
                 'datas' => array(
@@ -218,7 +230,7 @@ class WPUTarteAuCitron {
                 )
             ),
             'banner_orientation' => array(
-                'section' => 'settings',
+                'section' => 'settings_banner',
                 'label' => __('Banner position', 'wputarteaucitron'),
                 'type' => 'select',
                 'datas' => array(
@@ -229,20 +241,28 @@ class WPUTarteAuCitron {
                 )
             ),
             'banner_message' => array(
-                'section' => 'settings',
+                'section' => 'settings_banner',
                 'label' => __('Banner message', 'wputarteaucitron'),
                 'lang' => 1,
                 'type' => 'textarea'
             ),
             'display_accept_all_cta' => array(
-                'section' => 'settings',
+                'section' => 'settings_banner',
                 'label' => __('Display the “Accept All” CTA', 'wputarteaucitron'),
                 'type' => 'select',
                 'datas' => $yes_no
             ),
             'display_deny_all_cta' => array(
-                'section' => 'settings',
+                'section' => 'settings_banner',
                 'label' => __('Display the “Deny All” CTA', 'wputarteaucitron'),
+                'type' => 'select',
+                'datas' => $yes_no
+            ),
+            'disable_google_consent_mode' => array(
+                'section' => 'trackers_google',
+                'label' => __('Disable Google Consent Mode', 'wputarteaucitron'),
+                'help' => __('If you use Google Consent Mode elsewhere, you can disable it here to avoid conflicts', 'wputarteaucitron'),
+                'default_value' => '0',
                 'type' => 'select',
                 'datas' => $yes_no
             )
@@ -284,6 +304,9 @@ class WPUTarteAuCitron {
         $item = array_merge($base_setting, array(
             'label' => $args['label']
         ));
+        if (isset($args['section'])) {
+            $item['section'] = $args['section'];
+        }
         if (isset($args['help'])) {
             $item['help'] = $args['help'];
         }
@@ -333,6 +356,7 @@ class WPUTarteAuCitron {
             'nonce' => wp_create_nonce('wputarteaucitron_nonce'),
             'accept_all_cta' => !isset($settings['display_accept_all_cta']) || $settings['display_accept_all_cta'],
             'deny_all_cta' => isset($settings['display_deny_all_cta']) && $settings['display_deny_all_cta'],
+            'disable_google_consent_mode' => isset($settings['disable_google_consent_mode']) && $settings['disable_google_consent_mode'],
             'show_icon' => !isset($settings['show_icon']) || $settings['show_icon'],
             'cookie_name' => 'tarteaucitron',
             'hashtag' => '#tarteaucitron',
