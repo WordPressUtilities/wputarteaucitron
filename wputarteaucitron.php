@@ -5,7 +5,7 @@ Plugin Name: WPU Tarte Au Citron
 Plugin URI: https://github.com/WordPressUtilities/wputarteaucitron
 Update URI: https://github.com/WordPressUtilities/wputarteaucitron
 Description: Simple implementation for Tarteaucitron.js
-Version: 1.1.1
+Version: 1.2.0
 Author: Darklg
 Author URI: https://darklg.me/
 Text Domain: wputarteaucitron
@@ -22,8 +22,8 @@ class WPUTarteAuCitron {
     public $plugin_description;
     public $settings_details;
     public $settings;
-    private $plugin_version = '1.1.1';
-    private $tarteaucitron_version = '1.26.0';
+    private $plugin_version = '1.2.0';
+    private $tarteaucitron_version = '1.27.1';
     private $settings_obj;
     private $prefix_stat = 'wputarteaucitron_stat_';
     private $plugin_settings = array(
@@ -55,6 +55,27 @@ class WPUTarteAuCitron {
             'setting_key' => 'ga4_id',
             'user_key' => 'gtagUa',
             'example' => 'G-12345678'
+        ),
+        'matomocloud' => array(
+            'section' => 'trackers_matomo',
+            'label' => 'Matomo',
+            'field_label' => 'Matomo ID',
+            'setting_key' => 'matomocloud_id',
+            'user_key' => 'matomoId',
+            'extra_settings' => array(
+                'matomo_host' => array(
+                    'label' => 'Matomo Host',
+                    'section' => 'trackers_matomo',
+                    'setting_key' => 'matomocloud_host',
+                    'user_key' => 'matomoHost'
+                ),
+                'matomo_jspath' => array(
+                    'label' => 'Matomo JS Path',
+                    'section' => 'trackers_matomo',
+                    'setting_key' => 'matomocloud_jspath',
+                    'user_key' => 'matomoCustomJSPath'
+                )
+            )
         ),
         'facebookpixel' => array(
             'label' => 'Facebook Pixel',
@@ -98,24 +119,6 @@ class WPUTarteAuCitron {
             'setting_key' => 'plausible_domain',
             'user_key' => 'plausibleDomain'
         ),
-        'matomocloud' => array(
-            'label' => 'Matomo',
-            'field_label' => 'Matomo ID',
-            'setting_key' => 'matomocloud_id',
-            'user_key' => 'matomoId',
-            'extra_settings' => array(
-                'matomo_host' => array(
-                    'label' => 'Matomo Host',
-                    'setting_key' => 'matomocloud_host',
-                    'user_key' => 'matomoHost'
-                ),
-                'matomo_jspath' => array(
-                    'label' => 'Matomo JS Path',
-                    'setting_key' => 'matomocloud_jspath',
-                    'user_key' => 'matomoCustomJSPath'
-                )
-            )
-        )
     );
 
     public function __construct() {
@@ -171,6 +174,10 @@ class WPUTarteAuCitron {
                 ),
                 'trackers_google' => array(
                     'name' => __('Trackers - Google', 'wputarteaucitron'),
+                    'is_open' => false
+                ),
+                'trackers_matomo' => array(
+                    'name' => __('Trackers - Matomo', 'wputarteaucitron'),
                     'is_open' => false
                 ),
                 'trackers' => array(
@@ -381,10 +388,12 @@ class WPUTarteAuCitron {
             $script_settings[$key] = $settings[$key];
         }
 
+        $forced_scripts = apply_filters('wputarteaucitron__forced_scripts', array());
+
         /* Build settings for services */
         $script_settings['services'] = array();
         foreach ($this->services as $k => $service) {
-            if (!isset($script_settings[$service['setting_key']])) {
+            if (!isset($script_settings[$service['setting_key']]) && !in_array($k, $forced_scripts)) {
                 continue;
             }
             $script_settings['services'][$k] = array(

@@ -152,8 +152,8 @@ function wputarteaucitron_init_service(_id, _details) {
             });
         }
         wputarteaucitron_init_service__add_user_key(_details);
-        tarteaucitron.job.push(_id);
     }
+    tarteaucitron.job.push(_id);
 
     /* When service is enabled */
     function loaded_service() {
