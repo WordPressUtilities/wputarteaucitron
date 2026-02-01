@@ -5,7 +5,7 @@ Plugin Name: WPU Tarte Au Citron
 Plugin URI: https://github.com/WordPressUtilities/wputarteaucitron
 Update URI: https://github.com/WordPressUtilities/wputarteaucitron
 Description: Simple implementation for Tarteaucitron.js
-Version: 1.2.0
+Version: 1.2.1
 Author: Darklg
 Author URI: https://darklg.me/
 Text Domain: wputarteaucitron
@@ -22,8 +22,8 @@ class WPUTarteAuCitron {
     public $plugin_description;
     public $settings_details;
     public $settings;
-    private $plugin_version = '1.2.0';
-    private $tarteaucitron_version = '1.27.1';
+    private $plugin_version = '1.2.1';
+    private $tarteaucitron_version = '1.29.0';
     private $settings_obj;
     private $prefix_stat = 'wputarteaucitron_stat_';
     private $plugin_settings = array(
@@ -189,6 +189,7 @@ class WPUTarteAuCitron {
 
         $yes_no = array(__('No', 'wputarteaucitron'), __('Yes', 'wputarteaucitron'));
 
+        $privacy_page_id = get_option('wp_page_for_privacy_policy');
         $this->settings = array(
             'enable_banner' => array(
                 'section' => 'settings',
@@ -213,6 +214,7 @@ class WPUTarteAuCitron {
                 'label' => __('Privacy URL', 'wputarteaucitron'),
                 'lang' => 1,
                 'type' => 'post',
+                'default_value' => $privacy_page_id ? (int) $privacy_page_id : '',
                 'post_type' => 'page'
             ),
             'custom_icon_id' => array(
