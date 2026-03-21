@@ -35,6 +35,67 @@ tarteaucitron.services.iframe = {
     }
 };
 
+// teambrain
+tarteaucitron.services.teambrain = {
+    "key": "teambrain",
+    "type": "analytic",
+    "name": "TeamBrain",
+    "uri": "https://teambrain.app/",
+    "needConsent": true,
+    "cookies": [],
+    "js": function () {
+        "use strict";
+
+        if (tarteaucitron.user.teambrainUrl === undefined || tarteaucitron.user.teambrainProxyUrl === undefined) {
+            return;
+        }
+
+        tarteaucitron.addScript(tarteaucitron.user.teambrainUrl, 'tb-ext-app', '', '', 'data-proxy-url', tarteaucitron.user.teambrainProxyUrl);
+    }
+};
+
+// usercom
+tarteaucitron.services.usercom = {
+    "key": "usercom",
+    "type": "analytic",
+    "name": "User.com",
+    "uri": "https://user.com/security/privacy-policy",
+    "needConsent": true,
+    "cookies": ['_ca_chat'],
+    "js": function () {
+        "use strict";
+
+        if (tarteaucitron.user.userId === undefined || tarteaucitron.user.userApiKey === undefined) {
+            return;
+        }
+
+        window.civchat = {
+            apiKey: tarteaucitron.user.userApiKey,
+        };
+
+        tarteaucitron.addScript('https://' + tarteaucitron.user.userId + '.user.com/widget.js');
+    }
+};
+
+// cjcom
+tarteaucitron.services.cjcom = {
+    "key": "cjcom",
+    "type": "ads",
+    "name": "CJ.com",
+    "uri": "https://www.cj.com/legal/privacy-policy-services",
+    "needConsent": true,
+    "cookies": [],
+    "js": function () {
+        "use strict";
+
+        if (tarteaucitron.user.cjUserId === undefined) {
+            return;
+        }
+
+        tarteaucitron.addScript('https://www.mczbf.com/tags/'+tarteaucitron.user.cjUserId+'/tag.js', 'cjapitag');
+    }
+};
+
 // clickdimensions
 tarteaucitron.services.clickdimensions = {
     "key": "clickdimensions",
@@ -51,11 +112,11 @@ tarteaucitron.services.clickdimensions = {
         }
 
         tarteaucitron.addScript('https://analytics-eu.clickdimensions.com/ts.js', '', function() {
-            var cdAnalytics = new clickdimensions.Analytics('analytics-eu.clickdimensions.com');
-            cdAnalytics.setAccountKey(tarteaucitron.user.clickdimensionsAccountKey);
-            cdAnalytics.setDomain(tarteaucitron.user.clickdimensionsDomain);
-            cdAnalytics.setScore(typeof(cdScore) == "undefined" ? 0 : (cdScore == 0 ? null : cdScore));
-            cdAnalytics.trackPage();
+            window.cdAnalytics = new clickdimensions.Analytics('analytics-eu.clickdimensions.com');
+            window.cdAnalytics.setAccountKey(tarteaucitron.user.clickdimensionsAccountKey);
+            window.cdAnalytics.setDomain(tarteaucitron.user.clickdimensionsDomain);
+            window.cdAnalytics.setScore(typeof(cdScore) == "undefined" ? 0 : (cdScore == 0 ? null : cdScore));
+            window.cdAnalytics.trackPage();
         });
     }
 };
@@ -79,8 +140,9 @@ tarteaucitron.services.madmetrics = {
             var clientId = tarteaucitron.user.madmetricsClientId,
                 siteId = tarteaucitron.user.madmetricsSiteId,
                 directId = tarteaucitron.user.madmetricsDirectId,
-                referalId = tarteaucitron.user.madmetricsReferalId;
-            var _kTck = new KaTracker( clientId, siteId, directId, referalId );
+                referalId = tarteaucitron.user.madmetricsReferalId,
+                llmId = tarteaucitron.user.madmetricsLlmId;
+            var _kTck = new KaTracker( clientId, siteId, directId, referalId, llmId );
             _kTck.setBridge('https://' + tarteaucitron.user.madmetricsHostname + '/k_redirect_md.php');
             _kTck.track();
         });
@@ -5909,7 +5971,7 @@ tarteaucitron.services.matomotm = {
     "name": "Matomo Tag Manager",
     "uri": "https://matomo.org/privacy/",
     "needConsent": true,
-    "cookies": [],
+    "cookies": ['_pk.id', '_pk.sess'],
     "js": function () {
         "use strict";
         if (tarteaucitron.user.matomotmUrl === undefined) {
@@ -5927,12 +5989,11 @@ tarteaucitron.services.matomotm = {
             return;
         }
 
+        if (tarteaucitron.parameters.softConsentMode === true) {
+            return;
+        }
+
         var _mtm = window._mtm = window._mtm || [];
-        _mtm.push(['disableCookies']);
-        _mtm.push(['disableBrowserFeatureDetection']);
-        _mtm.push(['setAnonymizeIp', true]);
-        _mtm.push(['disablePerformanceTracking']);
-        _mtm.push(['disableHeartBeatTimer']);
         _mtm.push({'mtm.startTime': (new Date().getTime()), 'event': 'mtm.Start'});
 
         tarteaucitron.addScript(tarteaucitron.user.matomotmUrl);

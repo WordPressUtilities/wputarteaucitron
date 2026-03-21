@@ -5,7 +5,7 @@ Plugin Name: WPU Tarte Au Citron
 Plugin URI: https://github.com/WordPressUtilities/wputarteaucitron
 Update URI: https://github.com/WordPressUtilities/wputarteaucitron
 Description: Simple implementation for Tarteaucitron.js
-Version: 1.2.1
+Version: 1.3.0
 Author: Darklg
 Author URI: https://darklg.me/
 Text Domain: wputarteaucitron
@@ -22,8 +22,8 @@ class WPUTarteAuCitron {
     public $plugin_description;
     public $settings_details;
     public $settings;
-    private $plugin_version = '1.2.1';
-    private $tarteaucitron_version = '1.29.0';
+    private $plugin_version = '1.3.0';
+    private $tarteaucitron_version = '1.31.0';
     private $settings_obj;
     private $prefix_stat = 'wputarteaucitron_stat_';
     private $plugin_settings = array(
@@ -35,7 +35,6 @@ class WPUTarteAuCitron {
         'googleads' => array(
             'section' => 'trackers_google',
             'label' => 'Google Ads',
-            'field_label' => 'Google Ads ID',
             'setting_key' => 'googleads_id',
             'user_key' => 'googleadsId',
             'example' => 'AW-123456789'
@@ -43,7 +42,6 @@ class WPUTarteAuCitron {
         'googletagmanager' => array(
             'section' => 'trackers_google',
             'label' => 'Google Tag Manager',
-            'field_label' => 'GTM ID',
             'setting_key' => 'gtm_id',
             'user_key' => 'googletagmanagerId',
             'example' => 'GTM-1234'
@@ -51,15 +49,13 @@ class WPUTarteAuCitron {
         'gtag' => array(
             'section' => 'trackers_google',
             'label' => 'GA 4',
-            'field_label' => 'GA 4 ID',
             'setting_key' => 'ga4_id',
             'user_key' => 'gtagUa',
             'example' => 'G-12345678'
         ),
         'matomocloud' => array(
             'section' => 'trackers_matomo',
-            'label' => 'Matomo',
-            'field_label' => 'Matomo ID',
+            'label' => 'Matomo ID',
             'setting_key' => 'matomocloud_id',
             'user_key' => 'matomoId',
             'extra_settings' => array(
@@ -79,27 +75,23 @@ class WPUTarteAuCitron {
         ),
         'facebookpixel' => array(
             'label' => 'Facebook Pixel',
-            'field_label' => 'Facebook Pixel ID',
             'setting_key' => 'fbpix_id',
             'user_key' => 'facebookpixelId',
             'example' => '123487593'
         ),
         'hubspot' => array(
             'label' => 'Hubspot API',
-            'field_label' => 'Hubspot API key',
             'setting_key' => 'hubspot_api_key',
             'user_key' => 'hubspotId'
         ),
         'hotjar' => array(
             'label' => 'Hotjar',
-            'field_label' => 'Hotjar ID',
             'setting_key' => 'hotjar_id',
             'user_key' => 'hotjarId',
             'example' => '1234567',
             'extra_settings' => array(
                 'hotjar_sv' => array(
                     'label' => 'Hotjar SV',
-                    'field_label' => 'Hotjar SV',
                     'setting_key' => 'hotjar_sv',
                     'user_key' => 'HotjarSv',
                     'example' => '5'
@@ -108,17 +100,21 @@ class WPUTarteAuCitron {
         ),
         'linkedininsighttag' => array(
             'label' => 'LinkedIn Insight',
-            'field_label' => 'LinkedIn Insight Tag',
             'setting_key' => 'linkedin_partner_id',
             'user_key' => 'linkedininsighttag',
             'example' => '123456'
         ),
         'plausible' => array(
             'label' => 'Plausible',
-            'field_label' => 'Plausible Domain',
             'setting_key' => 'plausible_domain',
             'user_key' => 'plausibleDomain'
         ),
+        'twitteruwt' => array(
+            'label' => 'Twitter UWT',
+            'setting_key' => 'twitteruwt_id',
+            'user_key' => 'twitteruwtId',
+            'example' => 'o2f123'
+        )
     );
 
     public function __construct() {
@@ -417,7 +413,6 @@ class WPUTarteAuCitron {
                 }
             }
         }
-
         $script_settings = apply_filters('wputarteaucitron__script_settings', $script_settings);
         wp_localize_script('wputarteaucitron_front_script', 'wputarteaucitron_settings', $script_settings);
         wp_enqueue_script('wputarteaucitron_front_script');

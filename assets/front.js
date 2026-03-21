@@ -144,15 +144,15 @@ function wputarteaucitron_init_service__add_user_key(_details) {
 
 function wputarteaucitron_init_service(_id, _details) {
     'use strict';
-
-    if (wputarteaucitron_settings[_details.setting_key]) {
-        if (_details.extra) {
-            Object.keys(_details.extra).forEach(function(key) {
-                wputarteaucitron_init_service__add_user_key(_details.extra[key]);
-            });
-        }
-        wputarteaucitron_init_service__add_user_key(_details);
+    if (!wputarteaucitron_settings[_details.setting_key]) {
+        return;
     }
+    if (_details.extra) {
+        Object.keys(_details.extra).forEach(function(key) {
+            wputarteaucitron_init_service__add_user_key(_details.extra[key]);
+        });
+    }
+    wputarteaucitron_init_service__add_user_key(_details);
     tarteaucitron.job.push(_id);
 
     /* When service is enabled */
