@@ -5,7 +5,7 @@ Plugin Name: WPU Tarte Au Citron
 Plugin URI: https://github.com/WordPressUtilities/wputarteaucitron
 Update URI: https://github.com/WordPressUtilities/wputarteaucitron
 Description: Simple implementation for Tarteaucitron.js
-Version: 1.3.0
+Version: 1.3.1
 Author: Darklg
 Author URI: https://darklg.me/
 Text Domain: wputarteaucitron
@@ -22,8 +22,8 @@ class WPUTarteAuCitron {
     public $plugin_description;
     public $settings_details;
     public $settings;
-    private $plugin_version = '1.3.0';
-    private $tarteaucitron_version = '1.31.0';
+    private $plugin_version = '1.3.1';
+    private $tarteaucitron_version = '1.32.0';
     private $settings_obj;
     private $prefix_stat = 'wputarteaucitron_stat_';
     private $plugin_settings = array(
@@ -118,8 +118,8 @@ class WPUTarteAuCitron {
     );
 
     public function __construct() {
-        add_filter('init', array(&$this, 'load_translation'));
-        add_filter('init', array(&$this, 'init'));
+        add_action('init', array(&$this, 'load_translation'));
+        add_action('init', array(&$this, 'init'));
 
         # Front Assets
         add_action('wp_enqueue_scripts', array(&$this, 'wp_enqueue_scripts'));
@@ -330,7 +330,7 @@ class WPUTarteAuCitron {
         $current_lang = $this->settings_obj->get_current_language();
 
         /* Check default settings */
-        if (empty($settings) || !is_array($settings) || isset($settings['enable_banner']) && $settings['enable_banner'] == '0') {
+        if (empty($settings) || !is_array($settings) || (isset($settings['enable_banner']) && $settings['enable_banner'] == '0')) {
             return;
         }
 
@@ -349,8 +349,8 @@ class WPUTarteAuCitron {
         /* Privacy page */
         $privacy_page = false;
         $privacy_page_id = false;
-        if (isset($setting['privacy_page_id']) && $setting['privacy_page_id']) {
-            $privacy_page_id = $setting['privacy_page_id'];
+        if (isset($settings['privacy_page_id']) && $settings['privacy_page_id']) {
+            $privacy_page_id = $settings['privacy_page_id'];
         }
         $privacy_page_id_lang = $this->settings_obj->get_setting('privacy_page_id', !!$current_lang);
         if ($privacy_page_id_lang) {
@@ -524,7 +524,7 @@ class WPUTarteAuCitron {
             }
 
             $table_html .= '<tr>';
-            $table_html .= '<th scope="row">' . $infos['label'] . '</th>';
+            $table_html .= '<th scope="row">' . esc_html($infos['label']) . '</th>';
             $table_html .= '<td>' . $total . '</td>';
             $table_html .= '<td>' . $allowed . ' <small>(' . $stat_allowed . '%)</small></td>';
             $table_html .= '<td>' . $refused . ' <small>(' . $stat_refused . '%)</small></td>';
@@ -553,7 +553,7 @@ class WPUTarteAuCitron {
 
         $since = $this->stats_get_since();
         $date_format = get_option('date_format') . ', ' . get_option('time_format');
-        echo '<p>' . sprintf(__('Since %s', 'wputarteaucitron'), wp_date($date_format, $since)) . '.</p>';
+        echo '<p>' . sprintf(esc_html__('Since %s', 'wputarteaucitron'), wp_date($date_format, $since)) . '.</p>';
         if ($mode != 'widget') {
             echo '<form action="" method="post">';
             submit_button(__('Reset stats', 'wputarteaucitron'));
@@ -565,7 +565,7 @@ class WPUTarteAuCitron {
 
     public function info_display() {
         echo '<hr />';
-        echo '<p><a href="https://github.com/AmauriC/tarteaucitron.js" target="_blank">tarteaucitron.js</a> v' . $this->tarteaucitron_version . '</p>';
+        echo '<p><a href="https://github.com/AmauriC/tarteaucitron.js" rel="noopener noreferrer" target="_blank">tarteaucitron.js</a> v' . esc_html($this->tarteaucitron_version) . '</p>';
     }
 
     public function wputarteaucitron_add_dashboard_widget() {
