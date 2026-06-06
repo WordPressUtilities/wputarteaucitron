@@ -5,7 +5,7 @@ Plugin Name: WPU Tarte Au Citron
 Plugin URI: https://github.com/WordPressUtilities/wputarteaucitron
 Update URI: https://github.com/WordPressUtilities/wputarteaucitron
 Description: Simple implementation for Tarteaucitron.js
-Version: 1.3.1
+Version: 1.3.2
 Author: Darklg
 Author URI: https://darklg.me/
 Text Domain: wputarteaucitron
@@ -22,8 +22,8 @@ class WPUTarteAuCitron {
     public $plugin_description;
     public $settings_details;
     public $settings;
-    private $plugin_version = '1.3.1';
-    private $tarteaucitron_version = '1.32.0';
+    private $plugin_version = '1.3.2';
+    private $tarteaucitron_version = '1.33.0';
     private $settings_obj;
     private $prefix_stat = 'wputarteaucitron_stat_';
     private $plugin_settings = array(
@@ -508,10 +508,10 @@ class WPUTarteAuCitron {
                 continue;
             }
 
-            if (!$allowed) {
+            if (!$allowed || !is_numeric($allowed)) {
                 $allowed = 0;
             }
-            if (!$refused) {
+            if (!$refused || !is_numeric($refused)) {
                 $refused = 0;
             }
 
@@ -557,7 +557,7 @@ class WPUTarteAuCitron {
         if ($mode != 'widget') {
             echo '<form action="" method="post">';
             submit_button(__('Reset stats', 'wputarteaucitron'));
-            echo wp_nonce_field($this->prefix_stat, $this->prefix_stat . 'nonce');
+            wp_nonce_field($this->prefix_stat, $this->prefix_stat . 'nonce');
             echo '</form>';
             echo '</div>';
         }

@@ -506,6 +506,10 @@ div#tarteaucitronServices {
     display: block;
 }
 
+li.tarteaucitronLine .tarteaucitronName span.tarteaucitronServiceDescription {
+    display: block;
+}
+
 .cookie-list {
     list-style: none;
     padding: 0;
