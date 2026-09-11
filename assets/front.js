@@ -21,7 +21,8 @@
         "cookieslist": false,
         "showIcon": wputarteaucitron_settings.show_icon ? true : false,
         "adblocker": false,
-        "DenyAllCta": wputarteaucitron_settings.deny_all_cta ? true : false,
+        /* A blocking overlay without an equally easy refusal is a consent wall: force the Deny CTA */
+        "DenyAllCta": (wputarteaucitron_settings.deny_all_cta || wputarteaucitron_settings.blocking_overlay) ? true : false,
         "AcceptAllCta": wputarteaucitron_settings.accept_all_cta ? true : false,
         "highPrivacy": true,
         "googleConsentMode": wputarteaucitron_settings.disable_google_consent_mode ? false : true,
@@ -68,10 +69,22 @@
       Check if banner is visible
     ---------------------------------------------------------- */
 
-    document.body.setAttribute('data-wputarteaucitron-banner-visible', '1');
+    /* Start at 0: the banner is only really visible once tarteaucitron opens the alert */
+    document.body.setAttribute('data-wputarteaucitron-banner-visible', '0');
+    window.addEventListener('tac.open_alert', function() {
+        document.body.setAttribute('data-wputarteaucitron-banner-visible', '1');
+    });
     window.addEventListener('tac.close_alert', function() {
         document.body.setAttribute('data-wputarteaucitron-banner-visible', '0');
     });
+
+    /* ----------------------------------------------------------
+      Blocking overlay
+    ---------------------------------------------------------- */
+
+    if (wputarteaucitron_settings.blocking_overlay) {
+        document.body.setAttribute('data-wputarteaucitron-blocking-overlay', '1');
+    }
 
     /* ----------------------------------------------------------
       Watch events

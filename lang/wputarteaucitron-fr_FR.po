@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: WPU Tarte Au Citron\n"
-"POT-Creation-Date: 2026-06-06 22:45+0200\n"
+"POT-Creation-Date: 2026-09-11 22:34+0200\n"
 "PO-Revision-Date: \n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -176,10 +176,22 @@ msgid "Display the “Deny All” CTA"
 msgstr "Afficher le CTA « Refuser tout »"
 
 #: .././wputarteaucitron.php:272
+msgid "Blocking overlay"
+msgstr "Voile bloquant"
+
+#: .././wputarteaucitron.php:273
+msgid ""
+"Blocks the page until a choice is made. The “Deny All” CTA is forced on for "
+"legal compliance."
+msgstr ""
+"Bloque la page tant qu’aucun choix n’est fait. Le CTA « Refuser tout » est "
+"forcé pour des raisons de conformité légale."
+
+#: .././wputarteaucitron.php:280
 msgid "Disable Google Consent Mode"
 msgstr "Désactiver Google Consent Mode"
 
-#: .././wputarteaucitron.php:273
+#: .././wputarteaucitron.php:281
 msgid ""
 "If you use Google Consent Mode elsewhere, you can disable it here to avoid "
 "conflicts"
@@ -187,37 +199,37 @@ msgstr ""
 "Si vous utilisez le consent mode de Google ailleurs, vous pouvez le "
 "désactiver ici pour éviter les conflits"
 
-#: .././wputarteaucitron.php:323
+#: .././wputarteaucitron.php:331
 #, php-format
 msgid "Example: %s"
 msgstr "Exemple: %s"
 
-#: .././wputarteaucitron.php:540
+#: .././wputarteaucitron.php:550
 msgid "Stats"
 msgstr "Statistiques"
 
-#: .././wputarteaucitron.php:546
+#: .././wputarteaucitron.php:556
 msgid "Total"
 msgstr "Total"
 
-#: .././wputarteaucitron.php:547
+#: .././wputarteaucitron.php:557
 msgid "Accepted"
 msgstr "Accepté"
 
-#: .././wputarteaucitron.php:548
+#: .././wputarteaucitron.php:558
 msgid "Refused"
 msgstr "Refusé"
 
-#: .././wputarteaucitron.php:556
+#: .././wputarteaucitron.php:566
 #, php-format
 msgid "Since %s"
 msgstr "Depuis le %s"
 
-#: .././wputarteaucitron.php:559
+#: .././wputarteaucitron.php:569
 msgid "Reset stats"
 msgstr "Réinitialiser les statistiques"
 
-#: .././wputarteaucitron.php:588
+#: .././wputarteaucitron.php:598
 msgid "No stats yet."
 msgstr "Pas encore de statistiques."
 

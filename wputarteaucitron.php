@@ -5,7 +5,7 @@ Plugin Name: WPU Tarte Au Citron
 Plugin URI: https://github.com/WordPressUtilities/wputarteaucitron
 Update URI: https://github.com/WordPressUtilities/wputarteaucitron
 Description: Simple implementation for Tarteaucitron.js
-Version: 1.3.2
+Version: 1.4.0
 Author: Darklg
 Author URI: https://darklg.me/
 Text Domain: wputarteaucitron
@@ -22,8 +22,8 @@ class WPUTarteAuCitron {
     public $plugin_description;
     public $settings_details;
     public $settings;
-    private $plugin_version = '1.3.2';
-    private $tarteaucitron_version = '1.33.0';
+    private $plugin_version = '1.4.0';
+    private $tarteaucitron_version = '1.34.0';
     private $settings_obj;
     private $prefix_stat = 'wputarteaucitron_stat_';
     private $plugin_settings = array(
@@ -267,6 +267,14 @@ class WPUTarteAuCitron {
                 'type' => 'select',
                 'datas' => $yes_no
             ),
+            'blocking_overlay' => array(
+                'section' => 'settings_banner',
+                'label' => __('Blocking overlay', 'wputarteaucitron'),
+                'help' => __('Blocks the page until a choice is made. The “Deny All” CTA is forced on for legal compliance.', 'wputarteaucitron'),
+                'default_value' => '0',
+                'type' => 'select',
+                'datas' => $yes_no
+            ),
             'disable_google_consent_mode' => array(
                 'section' => 'trackers_google',
                 'label' => __('Disable Google Consent Mode', 'wputarteaucitron'),
@@ -365,6 +373,8 @@ class WPUTarteAuCitron {
             'nonce' => wp_create_nonce('wputarteaucitron_nonce'),
             'accept_all_cta' => !isset($settings['display_accept_all_cta']) || $settings['display_accept_all_cta'],
             'deny_all_cta' => isset($settings['display_deny_all_cta']) && $settings['display_deny_all_cta'],
+            /* Never block the privacy page: users must be able to read it before choosing */
+            'blocking_overlay' => !empty($settings['blocking_overlay']) && !($privacy_page_id && is_page($privacy_page_id)),
             'disable_google_consent_mode' => isset($settings['disable_google_consent_mode']) && $settings['disable_google_consent_mode'],
             'show_icon' => !isset($settings['show_icon']) || $settings['show_icon'],
             'cookie_name' => 'tarteaucitron',
