@@ -5,7 +5,7 @@ Plugin Name: WPU Tarte Au Citron
 Plugin URI: https://github.com/WordPressUtilities/wputarteaucitron
 Update URI: https://github.com/WordPressUtilities/wputarteaucitron
 Description: Simple implementation for Tarteaucitron.js
-Version: 1.4.0
+Version: 1.5.0
 Author: Darklg
 Author URI: https://darklg.me/
 Text Domain: wputarteaucitron
@@ -22,10 +22,12 @@ class WPUTarteAuCitron {
     public $plugin_description;
     public $settings_details;
     public $settings;
-    private $plugin_version = '1.4.0';
+    private $plugin_version = '1.5.0';
     private $tarteaucitron_version = '1.34.0';
     private $settings_obj;
+    private $stats_obj = false;
     private $prefix_stat = 'wputarteaucitron_stat_';
+    private $stats_table_name = 'wputarteaucitron_stats';
     private $plugin_settings = array(
         'id' => 'wputarteaucitron',
         'name' => 'WPU Tarte Au Citron'
@@ -132,6 +134,10 @@ class WPUTarteAuCitron {
         add_action('wpubasesettings_after_content_settings_page_wputarteaucitron', array(&$this, 'stats_display'));
         add_action('wpubasesettings_after_content_settings_page_wputarteaucitron', array(&$this, 'info_display'));
         add_action('load-settings_page_wputarteaucitron', array(&$this, 'stats_reset_action'));
+        add_action('admin_enqueue_scripts', array(&$this, 'admin_enqueue_scripts'));
+
+        # Reset legacy counters when logs are enabled
+        add_action('update_option_' . $this->plugin_settings['id'] . '_options', array(&$this, 'stats_logs_activation'), 10, 2);
     }
 
     public function load_translation() {
@@ -201,6 +207,14 @@ class WPUTarteAuCitron {
                 'label' => __('Disable banner for logged in users', 'wputarteaucitron'),
                 'required' => true,
                 'help' => __('Banner will be visible only for non-logged in users', 'wputarteaucitron'),
+                'default_value' => '0',
+                'type' => 'select',
+                'datas' => $yes_no
+            ),
+            'enable_logs' => array(
+                'section' => 'settings',
+                'label' => __('Log consent history', 'wputarteaucitron'),
+                'help' => __('Stores a daily count of choices and displays an acceptance rate chart instead of the current totals. Enabling this resets the current counters.', 'wputarteaucitron'),
                 'default_value' => '0',
                 'type' => 'select',
                 'datas' => $yes_no
@@ -301,6 +315,8 @@ class WPUTarteAuCitron {
         $this->settings = apply_filters('wputarteaucitron__settings', $this->settings);
         require_once __DIR__ . '/inc/WPUBaseSettings/WPUBaseSettings.php';
         $this->settings_obj = new \wputarteaucitron\WPUBaseSettings($this->settings_details, $this->settings);
+
+        $this->stats_load_table();
 
         require_once __DIR__ . '/inc/WPUBaseUpdate/WPUBaseUpdate.php';
         $this->settings_update = new \wputarteaucitron\WPUBaseUpdate(
@@ -434,39 +450,157 @@ class WPUTarteAuCitron {
 
     public function callback_ajax() {
         check_ajax_referer('wputarteaucitron_nonce');
-        if (!isset($_POST['status'], $_POST['service']) || !$_POST['service']) {
+        if (!isset($_POST['services']) || !is_array($_POST['services'])) {
             return;
         }
 
-        if (!isset($this->services[$_POST['service']])) {
+        /* Only keep known services : keys come from the browser */
+        $statuses = array();
+        foreach ($_POST['services'] as $service_key => $status) {
+            if (!isset($this->services[$service_key])) {
+                continue;
+            }
+            $statuses[$service_key] = $status ? 1 : 0;
+        }
+
+        if (!$statuses) {
             return;
         }
 
-        $service_key = esc_sql($_POST['service']);
+        if ($this->stats_logs_enabled()) {
+            $this->stats_log_decision($statuses);
+        } else {
+            $this->stats_increment_counters($statuses);
+        }
 
+        wp_send_json_success();
+    }
+
+    /* ----------------------------------------------------------
+      Stats : storage
+    ---------------------------------------------------------- */
+
+    public function stats_logs_enabled() {
+        return $this->settings_obj && $this->settings_obj->get_setting('enable_logs') == '1';
+    }
+
+    /**
+     * Create / update the stats table when logs are enabled
+     */
+    public function stats_load_table() {
+        if (!$this->stats_logs_enabled()) {
+            return;
+        }
+        require_once __DIR__ . '/inc/WPUBaseAdminDatas/WPUBaseAdminDatas.php';
+        $this->stats_obj = new \wputarteaucitron\WPUBaseAdminDatas();
+        $this->stats_obj->init(array(
+            'handle_database' => false,
+            'plugin_id' => $this->plugin_settings['id'],
+            'table_name' => $this->stats_table_name,
+            'table_fields' => array(
+                'day' => array(
+                    'public_name' => __('Day', 'wputarteaucitron'),
+                    'type' => 'date'
+                ),
+                'service' => array(
+                    'public_name' => __('Service', 'wputarteaucitron'),
+                    'type' => 'varchar'
+                ),
+                'nb_ok' => array(
+                    'public_name' => __('Accepted', 'wputarteaucitron'),
+                    'type' => 'sql',
+                    'sql' => 'INT UNSIGNED NOT NULL DEFAULT 0'
+                ),
+                'nb_ko' => array(
+                    'public_name' => __('Refused', 'wputarteaucitron'),
+                    'type' => 'sql',
+                    'sql' => 'INT UNSIGNED NOT NULL DEFAULT 0'
+                ),
+                'nb_partial' => array(
+                    'public_name' => __('Partial', 'wputarteaucitron'),
+                    'type' => 'sql',
+                    'sql' => 'INT UNSIGNED NOT NULL DEFAULT 0'
+                )
+            )
+        ));
+
+        /* WPUBaseAdminDatas does not handle indexes : the unique key is required by the upsert */
+        $opt_index = $this->prefix_stat . 'table_index';
+        if (get_option($opt_index) != '1') {
+            global $wpdb;
+            $wpdb->query("ALTER TABLE " . $this->stats_obj->tablename . " ADD UNIQUE KEY day_service (`day`, `service`)");
+            update_option($opt_index, '1', false);
+        }
+    }
+
+    /**
+     * Legacy counters, used when logs are disabled
+     * @param array $statuses  [service_key => 0|1]
+     */
+    public function stats_increment_counters($statuses) {
         /* Bypassing option API to avoid cache problems */
         global $wpdb;
-        $option_id = $this->prefix_stat . 'service_' . $service_key . '_' . ($_POST['status'] ? 'allowed' : 'disallowed');
-        $option_value = $wpdb->get_var($wpdb->prepare("SELECT option_value FROM $wpdb->options WHERE option_name = %s", $option_id));
-        if (!is_numeric($option_value)) {
-            $wpdb->insert($wpdb->options, array(
-                'option_name' => $option_id,
-                'option_value' => 1,
-                'autoload' => 'no'
-            ));
-        } else {
-            $wpdb->update($wpdb->options, array(
-                'option_value' => intval($option_value) + 1,
-                'autoload' => 'no'
-            ), array(
-                'option_name' => $option_id
-            ));
+        foreach ($statuses as $service_key => $status) {
+            $option_id = $this->prefix_stat . 'service_' . $service_key . '_' . ($status ? 'allowed' : 'disallowed');
+            $option_value = $wpdb->get_var($wpdb->prepare("SELECT option_value FROM $wpdb->options WHERE option_name = %s", $option_id));
+            if (!is_numeric($option_value)) {
+                $wpdb->insert($wpdb->options, array(
+                    'option_name' => $option_id,
+                    'option_value' => 1,
+                    'autoload' => 'no'
+                ));
+            } else {
+                $wpdb->update($wpdb->options, array(
+                    'option_value' => intval($option_value) + 1,
+                    'autoload' => 'no'
+                ), array(
+                    'option_name' => $option_id
+                ));
+            }
         }
 
         /* Update since */
         $this->stats_get_since();
+    }
 
-        wp_send_json_success();
+    /**
+     * Store a full modal decision : one row per service, plus a global row
+     * @param array $statuses  [service_key => 0|1]
+     */
+    public function stats_log_decision($statuses) {
+        if (!$this->stats_obj) {
+            return;
+        }
+
+        /* Day is computed in the site timezone, not the MySQL server one */
+        $day = wp_date('Y-m-d');
+
+        foreach ($statuses as $service_key => $status) {
+            $this->stats_increment_row($day, $service_key, $status ? 'nb_ok' : 'nb_ko');
+        }
+
+        $values = array_values($statuses);
+        $global_column = 'nb_partial';
+        if (!in_array(0, $values, true)) {
+            $global_column = 'nb_ok';
+        } elseif (!in_array(1, $values, true)) {
+            $global_column = 'nb_ko';
+        }
+        $this->stats_increment_row($day, '_global', $global_column);
+    }
+
+    /**
+     * Atomic increment of one counter, relies on the UNIQUE (day, service) key
+     */
+    private function stats_increment_row($day, $service, $column) {
+        /* $column is never user input : it is one of the three hardcoded names above */
+        global $wpdb;
+        $table = $this->stats_obj->tablename;
+        $wpdb->query($wpdb->prepare(
+            "INSERT INTO {$table} (`day`, `service`, `{$column}`) VALUES (%s, %s, 1)
+             ON DUPLICATE KEY UPDATE `{$column}` = `{$column}` + 1",
+            $day, $service
+        ));
     }
 
     /* ----------------------------------------------------------
@@ -506,35 +640,109 @@ class WPUTarteAuCitron {
         }
     }
 
-    public function stats_display($mode = 'default') {
-        $table_html = '';
+    /**
+     * Freeze and reset legacy counters when logs are switched on
+     */
+    public function stats_logs_activation($old_value, $new_value) {
+        $was_enabled = is_array($old_value) && isset($old_value['enable_logs']) && $old_value['enable_logs'] == '1';
+        $is_enabled = is_array($new_value) && isset($new_value['enable_logs']) && $new_value['enable_logs'] == '1';
+        if ($is_enabled && !$was_enabled) {
+            $this->stats_reset();
+        }
+    }
 
+    /* ----------------------------------------------------------
+      Stats : totals
+    ---------------------------------------------------------- */
+
+    /**
+     * Per service totals
+     * @return array [service_key => ['allowed' => int, 'refused' => int]]
+     */
+    public function stats_get_totals() {
+        if ($this->stats_logs_enabled()) {
+            return $this->stats_get_totals_from_table();
+        }
+        return $this->stats_get_totals_from_counters();
+    }
+
+    public function stats_get_totals_from_counters() {
+        $totals = array();
         foreach ($this->services as $key => $infos) {
             $base_id = $this->prefix_stat . 'service_' . $key;
             $allowed = get_option($base_id . '_allowed');
             $refused = get_option($base_id . '_disallowed');
-
             if (!is_numeric($allowed) && !is_numeric($refused)) {
                 continue;
             }
+            $totals[$key] = array(
+                'allowed' => is_numeric($allowed) ? intval($allowed) : 0,
+                'refused' => is_numeric($refused) ? intval($refused) : 0
+            );
+        }
+        return $totals;
+    }
 
-            if (!$allowed || !is_numeric($allowed)) {
-                $allowed = 0;
+    public function stats_get_totals_from_table($days = 30) {
+        if (!$this->stats_obj) {
+            return array();
+        }
+        global $wpdb;
+        $table = $this->stats_obj->tablename;
+        $since = wp_date('Y-m-d', time() - $days * DAY_IN_SECONDS);
+        $results = $wpdb->get_results($wpdb->prepare(
+            "SELECT `service`, SUM(`nb_ok`) AS nb_ok, SUM(`nb_ko`) AS nb_ko
+             FROM {$table} WHERE `day` >= %s AND `service` != '_global' GROUP BY `service`",
+            $since
+        ));
+
+        $totals = array();
+        foreach ($results as $result) {
+            if (!isset($this->services[$result->service])) {
+                continue;
             }
-            if (!$refused || !is_numeric($refused)) {
-                $refused = 0;
+            $totals[$result->service] = array(
+                'allowed' => intval($result->nb_ok),
+                'refused' => intval($result->nb_ko)
+            );
+        }
+        return $totals;
+    }
+
+    /* ----------------------------------------------------------
+      Stats : display
+    ---------------------------------------------------------- */
+
+    public function stats_display($mode = 'default') {
+        if ($this->stats_logs_enabled()) {
+            $this->stats_display_logs($mode);
+            return;
+        }
+        $this->stats_display_counters($mode);
+    }
+
+    /**
+     * Build the per service totals table
+     */
+    public function stats_display_table($totals) {
+        $table_html = '';
+        foreach ($totals as $key => $values) {
+            if (!isset($this->services[$key])) {
+                continue;
             }
+            $allowed = $values['allowed'];
+            $refused = $values['refused'];
+            $total = $allowed + $refused;
 
             $stat_allowed = '0';
             $stat_refused = '0';
-            $total = $allowed + $refused;
             if ($total) {
                 $stat_allowed = number_format($allowed / $total * 100, 2);
                 $stat_refused = number_format($refused / $total * 100, 2);
             }
 
             $table_html .= '<tr>';
-            $table_html .= '<th scope="row">' . esc_html($infos['label']) . '</th>';
+            $table_html .= '<th scope="row">' . esc_html($this->services[$key]['label']) . '</th>';
             $table_html .= '<td>' . $total . '</td>';
             $table_html .= '<td>' . $allowed . ' <small>(' . $stat_allowed . '%)</small></td>';
             $table_html .= '<td>' . $refused . ' <small>(' . $stat_refused . '%)</small></td>';
@@ -542,6 +750,26 @@ class WPUTarteAuCitron {
         }
 
         if (!$table_html) {
+            return '';
+        }
+
+        $html = '<table class="widefat fixed striped">';
+        $html .= '<thead>';
+        $html .= '<tr>';
+        $html .= '<th></th>';
+        $html .= '<th>' . __('Total', 'wputarteaucitron') . '</th>';
+        $html .= '<th>' . __('Accepted', 'wputarteaucitron') . '</th>';
+        $html .= '<th>' . __('Refused', 'wputarteaucitron') . '</th>';
+        $html .= '</tr>';
+        $html .= '</thead>';
+        $html .= '<tbody>' . $table_html . '</tbody>';
+        $html .= '</table>';
+        return $html;
+    }
+
+    public function stats_display_counters($mode = 'default') {
+        $table = $this->stats_display_table($this->stats_get_totals_from_counters());
+        if (!$table) {
             return;
         }
         if ($mode != 'widget') {
@@ -549,17 +777,7 @@ class WPUTarteAuCitron {
             echo '<div style="max-width:600px">';
             echo '<h2>' . __('Stats', 'wputarteaucitron') . '</h2>';
         }
-        echo '<table contenteditable class="widefat fixed striped">';
-        echo '<thead>';
-        echo '<tr>';
-        echo '<th></th>';
-        echo '<th>' . __('Total', 'wputarteaucitron') . '</th>';
-        echo '<th>' . __('Accepted', 'wputarteaucitron') . '</th>';
-        echo '<th>' . __('Refused', 'wputarteaucitron') . '</th>';
-        echo '</tr>';
-        echo '</thead>';
-        echo '<tbody>' . $table_html . '</tbody>';
-        echo '</table>';
+        echo $table;
 
         $since = $this->stats_get_since();
         $date_format = get_option('date_format') . ', ' . get_option('time_format');
@@ -571,6 +789,241 @@ class WPUTarteAuCitron {
             echo '</form>';
             echo '</div>';
         }
+    }
+
+    public function stats_display_logs($mode = 'default') {
+        if ($mode == 'widget') {
+            $table = $this->stats_display_table($this->stats_get_totals_from_table(30));
+            if (!$table) {
+                return;
+            }
+            echo $table;
+            echo '<p>' . esc_html__('Last 30 days.', 'wputarteaucitron') . '</p>';
+            return;
+        }
+
+        $period = $this->stats_get_current_period();
+        $service = $this->stats_get_current_service();
+        $chart = $this->stats_get_chart_datas($service, $period);
+
+        echo '<hr />';
+        echo '<div id="' . esc_attr($this->plugin_settings['id']) . '-stats" style="max-width:800px">';
+        echo '<h2>' . __('Stats', 'wputarteaucitron') . '</h2>';
+
+        echo $this->stats_get_filters_html($period, $service);
+
+        if (!$chart['labels']) {
+            echo '<p>' . esc_html__('No stats yet.', 'wputarteaucitron') . '</p>';
+            echo '</div>';
+            return;
+        }
+
+        echo '<div style="margin:1em 0"><canvas id="wputarteaucitron-chart" height="250"></canvas></div>';
+        echo '<p>' . esc_html(sprintf(
+            _n('%1$s decision, %2$s%% accepted over the period.', '%1$s decisions, %2$s%% accepted over the period.', $chart['total'], 'wputarteaucitron'),
+            number_format_i18n($chart['total']),
+            number_format($chart['rate'], 2)
+        )) . '</p>';
+
+        $json = wp_json_encode($chart, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT);
+        echo '<script id="wputarteaucitron-chart-datas" type="application/json">' . $json . '</script>';
+        /* Chart.js is loaded in the footer : wait for it before drawing */
+        echo '<script>(function(){';
+        echo 'function init(){if(typeof Chart==="undefined"){return setTimeout(init,50);}';
+        echo 'var d=JSON.parse(document.getElementById("wputarteaucitron-chart-datas").textContent);';
+        echo 'new Chart(document.getElementById("wputarteaucitron-chart"),{type:"line",';
+        echo 'data:{labels:d.labels,datasets:[{label:d.label,data:d.rates,borderColor:"#2271b1",backgroundColor:"rgba(34,113,177,.1)",fill:true,tension:.2}]},';
+        echo 'options:{responsive:true,maintainAspectRatio:false,scales:{y:{min:0,max:100,ticks:{callback:function(v){return v+"%";}}}},';
+        echo 'plugins:{tooltip:{callbacks:{label:function(c){return c.parsed.y.toFixed(2)+"% ("+d.totals[c.dataIndex]+")";}}}}}});';
+        echo '}init();}());</script>';
+
+        echo '</div>';
+    }
+
+    /**
+     * Available chart periods, in days
+     * @return array [days => label]
+     */
+    private function stats_get_periods() {
+        return array(
+            30 => __('30 days', 'wputarteaucitron'),
+            90 => __('90 days', 'wputarteaucitron'),
+            365 => __('12 months', 'wputarteaucitron')
+        );
+    }
+
+    private function stats_get_current_period() {
+        $periods = $this->stats_get_periods();
+        $period = isset($_GET['wputac_period']) ? intval($_GET['wputac_period']) : 0;
+        if (!isset($periods[$period])) {
+            $period = array_key_first($periods);
+        }
+        return $period;
+    }
+
+    private function stats_get_current_service() {
+        $service = isset($_GET['wputac_service']) ? sanitize_text_field(wp_unslash($_GET['wputac_service'])) : '_global';
+        if ($service != '_global' && !isset($this->services[$service])) {
+            $service = '_global';
+        }
+        return $service;
+    }
+
+    private function stats_get_filters_html($period, $service) {
+        /* Resolves the real parent page, which is filterable in WPUBaseSettings */
+        $base_url = menu_page_url($this->plugin_settings['id'], false);
+        if (!$base_url) {
+            $base_url = admin_url('options-general.php?page=' . $this->plugin_settings['id']);
+        }
+
+        $periods = $this->stats_get_periods();
+
+        $services = array('_global' => __('Global', 'wputarteaucitron'));
+        foreach ($this->stats_get_logged_services() as $key) {
+            $services[$key] = $this->services[$key]['label'];
+        }
+
+        /* Anchor : the stats block sits at the bottom of a long settings page */
+        $anchor = '#' . $this->plugin_settings['id'] . '-stats';
+
+        $html = '<p>';
+        foreach ($services as $key => $label) {
+            $url = add_query_arg(array('wputac_period' => $period, 'wputac_service' => $key), $base_url) . $anchor;
+            $html .= $key == $service
+            ? '<strong style="margin-right:1em">' . esc_html($label) . '</strong>'
+            : '<a style="margin-right:1em" href="' . esc_url($url) . '">' . esc_html($label) . '</a>';
+        }
+        $html .= '</p><p>';
+        foreach ($periods as $key => $label) {
+            $url = add_query_arg(array('wputac_period' => $key, 'wputac_service' => $service), $base_url) . $anchor;
+            $html .= $key == $period
+            ? '<strong style="margin-right:1em">' . esc_html($label) . '</strong>'
+            : '<a style="margin-right:1em" href="' . esc_url($url) . '">' . esc_html($label) . '</a>';
+        }
+        $html .= '</p>';
+        return $html;
+    }
+
+    /**
+     * Services having at least one logged row
+     */
+    private function stats_get_logged_services() {
+        if (!$this->stats_obj) {
+            return array();
+        }
+        global $wpdb;
+        $table = $this->stats_obj->tablename;
+        $keys = $wpdb->get_col("SELECT DISTINCT `service` FROM {$table} WHERE `service` != '_global'");
+        return array_values(array_filter($keys, function ($key) {
+            return isset($this->services[$key]);
+        }));
+    }
+
+    /**
+     * Acceptance rate over time for one service
+     */
+    public function stats_get_chart_datas($service, $period) {
+        $empty = array('labels' => array(), 'rates' => array(), 'totals' => array(), 'label' => '', 'total' => 0, 'rate' => 0);
+        if (!$this->stats_obj) {
+            return $empty;
+        }
+
+        /* Daily points up to 90 days, monthly beyond */
+        $is_monthly = $period > 90;
+        /* Percent signs are doubled : the query goes through $wpdb->prepare() */
+        $bucket = $is_monthly ? "DATE_FORMAT(`day`, '%%Y-%%m')" : "`day`";
+
+        global $wpdb;
+        $table = $this->stats_obj->tablename;
+        $since = wp_date('Y-m-d', time() - $period * DAY_IN_SECONDS);
+        $results = $wpdb->get_results($wpdb->prepare(
+            "SELECT {$bucket} AS bucket, SUM(`nb_ok`) AS nb_ok, SUM(`nb_ko`) AS nb_ko, SUM(`nb_partial`) AS nb_partial
+             FROM {$table} WHERE `service` = %s AND `day` >= %s GROUP BY bucket ORDER BY bucket ASC",
+            $service, $since
+        ));
+
+        if (!$results) {
+            return $empty;
+        }
+
+        $rows = array();
+        foreach ($results as $result) {
+            $rows[$result->bucket] = intval($result->nb_ok) + intval($result->nb_ko) + intval($result->nb_partial)
+            ? array(intval($result->nb_ok), intval($result->nb_ko) + intval($result->nb_partial))
+            : false;
+        }
+
+        $datas = $empty;
+        $datas['label'] = $service == '_global'
+        ? __('Global acceptance rate', 'wputarteaucitron')
+        : sprintf(__('Acceptance rate : %s', 'wputarteaucitron'), $this->services[$service]['label']);
+
+        $sum_ok = 0;
+        $sum_all = 0;
+        $date_format = $is_monthly ? 'M Y' : get_option('date_format');
+
+        /* Every bucket of the period is plotted : days without any decision stay visible as gaps */
+        foreach ($this->stats_get_period_buckets($period, $is_monthly) as $key => $timestamp) {
+            $datas['labels'][] = wp_date($date_format, $timestamp);
+            if (!isset($rows[$key]) || !$rows[$key]) {
+                $datas['rates'][] = null;
+                $datas['totals'][] = 0;
+                continue;
+            }
+            list($ok, $ko) = $rows[$key];
+            $total = $ok + $ko;
+            $datas['rates'][] = round($ok / $total * 100, 2);
+            $datas['totals'][] = $total;
+            $sum_ok += $ok;
+            $sum_all += $total;
+        }
+
+        $datas['total'] = $sum_all;
+        $datas['rate'] = $sum_all ? $sum_ok / $sum_all * 100 : 0;
+        return $datas;
+    }
+
+    /**
+     * Every bucket key of the period, mapped to a timestamp usable for display
+     * @return array [bucket_key => timestamp]
+     */
+    private function stats_get_period_buckets($period, $is_monthly) {
+        $buckets = array();
+
+        if (!$is_monthly) {
+            for ($i = $period; $i >= 0; $i--) {
+                $timestamp = time() - $i * DAY_IN_SECONDS;
+                $buckets[wp_date('Y-m-d', $timestamp)] = $timestamp;
+            }
+            return $buckets;
+        }
+
+        /* Months are walked as integers : building them from a string would reintroduce a timezone shift */
+        $start = time() - $period * DAY_IN_SECONDS;
+        $year = intval(wp_date('Y', $start));
+        $month = intval(wp_date('n', $start));
+        $last_key = wp_date('Y-m');
+        while (count($buckets) < 200) {
+            $key = sprintf('%04d-%02d', $year, $month);
+            /* Mid month : keeps the label on the right month whatever the timezone */
+            $buckets[$key] = strtotime($key . '-15 12:00:00');
+            if ($key === $last_key) {
+                break;
+            }
+            $month++;
+            if ($month > 12) {
+                $month = 1;
+                $year++;
+            }
+        }
+        return $buckets;
+    }
+
+    public function admin_enqueue_scripts($hook) {
+        if ($hook != 'settings_page_' . $this->plugin_settings['id'] || !$this->stats_logs_enabled()) {
+            return;
+        }
+        wp_enqueue_script('wputarteaucitron-chartjs', plugins_url('assets/chart.umd.min.js', __FILE__), array(), '4.4.4', true);
     }
 
     public function info_display() {
@@ -595,7 +1048,7 @@ class WPUTarteAuCitron {
         $out = ob_get_clean();
 
         if (!$out) {
-            echo '<p>' . __('No stats yet.', 'wputarteaucitron') . '</p>';
+            echo '<p>' . esc_html__('No stats yet.', 'wputarteaucitron') . '</p>';
         } else {
             echo $out;
         }

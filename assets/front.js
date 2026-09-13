@@ -132,16 +132,43 @@
   Callback AJAX
 ---------------------------------------------------------- */
 
+var wputarteaucitron_pending_statuses = false;
+
+/* Tarteaucitron fires one event per service : group them into a single decision */
 function wputarteaucitron_send_ajax_status(service, status) {
+    if (wputarteaucitron_pending_statuses === false) {
+        wputarteaucitron_pending_statuses = {};
+        setTimeout(wputarteaucitron_flush_ajax_status, 0);
+    }
+    wputarteaucitron_pending_statuses[service] = status;
+}
+
+function wputarteaucitron_flush_ajax_status() {
+    var statuses = wputarteaucitron_pending_statuses,
+        service;
+    wputarteaucitron_pending_statuses = false;
+    if (!statuses) {
+        return;
+    }
+
+    var form_data = new FormData();
+    form_data.append('action', 'wputarteaucitron_status');
+    form_data.append('_ajax_nonce', wputarteaucitron_settings.nonce);
+    for (service in statuses) {
+        form_data.append('services[' + service + ']', statuses[service]);
+    }
+
+    /* Beacon survives the page reload triggered when a loaded service is denied */
+    if (navigator.sendBeacon && navigator.sendBeacon(wputarteaucitron_settings.ajax_url, form_data)) {
+        return;
+    }
+
     jQuery.ajax({
         url: wputarteaucitron_settings.ajax_url,
         type: 'post',
-        data: {
-            'action': 'wputarteaucitron_status',
-            'service': service,
-            'status': status,
-            '_ajax_nonce': wputarteaucitron_settings.nonce
-        }
+        data: form_data,
+        processData: false,
+        contentType: false
     });
 }
 

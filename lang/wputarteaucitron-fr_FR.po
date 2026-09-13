@@ -6,6 +6,7 @@ msgstr ""
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: fr_FR\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -232,6 +233,60 @@ msgstr "Réinitialiser les statistiques"
 #: .././wputarteaucitron.php:598
 msgid "No stats yet."
 msgstr "Pas encore de statistiques."
+
+#: wputarteaucitron.php
+msgid "Log consent history"
+msgstr "Historiser les consentements"
+
+#: wputarteaucitron.php
+msgid "Stores a daily count of choices and displays an acceptance rate chart instead of the current totals. Enabling this resets the current counters."
+msgstr "Enregistre un comptage quotidien des choix et affiche un graphique du taux d’acceptation à la place des totaux actuels. L’activation réinitialise les compteurs actuels."
+
+#: wputarteaucitron.php
+msgid "Day"
+msgstr "Jour"
+
+#: wputarteaucitron.php
+msgid "Service"
+msgstr "Service"
+
+#: wputarteaucitron.php
+msgid "Partial"
+msgstr "Partiel"
+
+#: wputarteaucitron.php
+msgid "Last 30 days."
+msgstr "30 derniers jours."
+
+#: wputarteaucitron.php
+msgid "%1$s decision, %2$s%% accepted over the period."
+msgid_plural "%1$s decisions, %2$s%% accepted over the period."
+msgstr[0] "%1$s décision, %2$s%% d’acceptation sur la période."
+msgstr[1] "%1$s décisions, %2$s%% d’acceptation sur la période."
+
+#: wputarteaucitron.php
+msgid "30 days"
+msgstr "30 jours"
+
+#: wputarteaucitron.php
+msgid "90 days"
+msgstr "90 jours"
+
+#: wputarteaucitron.php
+msgid "12 months"
+msgstr "12 mois"
+
+#: wputarteaucitron.php
+msgid "Global"
+msgstr "Global"
+
+#: wputarteaucitron.php
+msgid "Global acceptance rate"
+msgstr "Taux d’acceptation global"
+
+#: wputarteaucitron.php
+msgid "Acceptance rate : %s"
+msgstr "Taux d’acceptation : %s"
 
 #~ msgid "GTM ID"
 #~ msgstr "GTM ID"

@@ -15,3 +15,5 @@ foreach ($options as $opt) {
 
 global $wpdb;
 $wpdb->query("DELETE FROM $wpdb->options WHERE option_name LIKE 'wputarteaucitron_stat_%'");
+delete_option('wputarteaucitron_wputarteaucitron_stats_version');
+$wpdb->query("DROP TABLE IF EXISTS " . $wpdb->prefix . "wputarteaucitron_stats");
