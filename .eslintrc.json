@@ -19,5 +19,5 @@
         "tarteaucitron": true,
         "wputarteaucitron_settings": true
     },
-    "ignorePatterns": ["assets/tarteaucitron/**"]
+    "ignorePatterns": ["assets/tarteaucitron/**", "assets/*.min.js"]
 }
