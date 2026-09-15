@@ -5,7 +5,7 @@ Plugin Name: WPU Tarte Au Citron
 Plugin URI: https://github.com/WordPressUtilities/wputarteaucitron
 Update URI: https://github.com/WordPressUtilities/wputarteaucitron
 Description: Simple implementation for Tarteaucitron.js
-Version: 1.5.0
+Version: 1.6.0
 Author: Darklg
 Author URI: https://darklg.me/
 Text Domain: wputarteaucitron
@@ -22,7 +22,7 @@ class WPUTarteAuCitron {
     public $plugin_description;
     public $settings_details;
     public $settings;
-    private $plugin_version = '1.5.0';
+    private $plugin_version = '1.6.0';
     private $tarteaucitron_version = '1.34.0';
     private $settings_obj;
     private $stats_obj = false;
@@ -440,6 +440,19 @@ class WPUTarteAuCitron {
             }
         }
         $script_settings = apply_filters('wputarteaucitron__script_settings', $script_settings);
+
+        /* Definitions for services not shipped with tarteaucitron.js */
+        $custom_services_js = '';
+        foreach ($this->services as $k => $service) {
+            if (!isset($script_settings['services'][$k]) || empty($service['custom_service'])) {
+                continue;
+            }
+            $custom_services_js .= 'tarteaucitron.services.' . $k . ' = ' . $service['custom_service'] . ';';
+        }
+        if ($custom_services_js) {
+            wp_add_inline_script('wputarteaucitron_front_script', $custom_services_js, 'before');
+        }
+
         wp_localize_script('wputarteaucitron_front_script', 'wputarteaucitron_settings', $script_settings);
         wp_enqueue_script('wputarteaucitron_front_script');
     }
