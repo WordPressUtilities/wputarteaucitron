@@ -5,12 +5,12 @@ Plugin Name: WPU Tarte Au Citron
 Plugin URI: https://github.com/WordPressUtilities/wputarteaucitron
 Update URI: https://github.com/WordPressUtilities/wputarteaucitron
 Description: Simple implementation for Tarteaucitron.js
-Version: 1.6.1
+Version: 1.6.2
 Author: Darklg
 Author URI: https://darklg.me/
 Text Domain: wputarteaucitron
 Domain Path: /lang
-Requires at least: 6.2
+Requires at least: 6.9
 Requires PHP: 8.0
 Network: Optional
 License: MIT License
@@ -22,12 +22,13 @@ class WPUTarteAuCitron {
     public $plugin_description;
     public $settings_details;
     public $settings;
-    private $plugin_version = '1.6.1';
-    private $tarteaucitron_version = '1.34.0';
+    private $plugin_version = '1.6.2';
+    private $tarteaucitron_version = '1.35.0';
     private $settings_obj;
     private $stats_obj = false;
     private $prefix_stat = 'wputarteaucitron_stat_';
     private $stats_table_name = 'wputarteaucitron_stats';
+    const STATS_DEFAULT_PERIOD = 15;
     private $plugin_settings = array(
         'id' => 'wputarteaucitron',
         'name' => 'WPU Tarte Au Citron'
@@ -833,8 +834,16 @@ class WPUTarteAuCitron {
 
         echo '<div style="margin:1em 0"><canvas id="wputarteaucitron-chart" height="250"></canvas></div>';
         echo '<p>' . esc_html(sprintf(
-            _n('%1$s decision, %2$s%% accepted over the period.', '%1$s decisions, %2$s%% accepted over the period.', $chart['total'], 'wputarteaucitron'),
+            _n(
+                '%1$s decision : %2$s accepted, %3$s refused, %4$s partial — %5$s%% acceptance over the period.',
+                '%1$s decisions : %2$s accepted, %3$s refused, %4$s partial — %5$s%% acceptance over the period.',
+                $chart['total'],
+                'wputarteaucitron'
+            ),
             number_format_i18n($chart['total']),
+            number_format_i18n($chart['accepted']),
+            number_format_i18n($chart['refused']),
+            number_format_i18n($chart['partial']),
             number_format($chart['rate'], 2)
         )) . '</p>';
 
@@ -859,6 +868,8 @@ class WPUTarteAuCitron {
      */
     private function stats_get_periods() {
         return array(
+            7 => __('7 days', 'wputarteaucitron'),
+            15 => __('15 days', 'wputarteaucitron'),
             30 => __('30 days', 'wputarteaucitron'),
             90 => __('90 days', 'wputarteaucitron'),
             365 => __('12 months', 'wputarteaucitron')
@@ -869,7 +880,7 @@ class WPUTarteAuCitron {
         $periods = $this->stats_get_periods();
         $period = isset($_GET['wputac_period']) ? intval($_GET['wputac_period']) : 0;
         if (!isset($periods[$period])) {
-            $period = array_key_first($periods);
+            $period = self::STATS_DEFAULT_PERIOD;
         }
         return $period;
     }
@@ -936,7 +947,7 @@ class WPUTarteAuCitron {
      * Acceptance rate over time for one service
      */
     public function stats_get_chart_datas($service, $period) {
-        $empty = array('labels' => array(), 'rates' => array(), 'totals' => array(), 'label' => '', 'total' => 0, 'rate' => 0);
+        $empty = array('labels' => array(), 'rates' => array(), 'totals' => array(), 'label' => '', 'total' => 0, 'rate' => 0, 'accepted' => 0, 'refused' => 0, 'partial' => 0);
         if (!$this->stats_obj) {
             return $empty;
         }
@@ -962,7 +973,7 @@ class WPUTarteAuCitron {
         $rows = array();
         foreach ($results as $result) {
             $rows[$result->bucket] = intval($result->nb_ok) + intval($result->nb_ko) + intval($result->nb_partial)
-            ? array(intval($result->nb_ok), intval($result->nb_ko) + intval($result->nb_partial))
+            ? array(intval($result->nb_ok), intval($result->nb_ko), intval($result->nb_partial))
             : false;
         }
 
@@ -972,8 +983,11 @@ class WPUTarteAuCitron {
         : sprintf(__('Acceptance rate : %s', 'wputarteaucitron'), $this->services[$service]['label']);
 
         $sum_ok = 0;
+        $sum_ko = 0;
+        $sum_partial = 0;
         $sum_all = 0;
-        $date_format = $is_monthly ? 'M Y' : get_option('date_format');
+        /* Daily points stay on d/m : the year would only crowd the axis */
+        $date_format = $is_monthly ? 'M Y' : 'd/m';
 
         /* Every bucket of the period is plotted : days without any decision stay visible as gaps */
         foreach ($this->stats_get_period_buckets($period, $is_monthly) as $key => $timestamp) {
@@ -983,16 +997,21 @@ class WPUTarteAuCitron {
                 $datas['totals'][] = 0;
                 continue;
             }
-            list($ok, $ko) = $rows[$key];
-            $total = $ok + $ko;
+            list($ok, $ko, $partial) = $rows[$key];
+            $total = $ok + $ko + $partial;
             $datas['rates'][] = round($ok / $total * 100, 2);
             $datas['totals'][] = $total;
             $sum_ok += $ok;
+            $sum_ko += $ko;
+            $sum_partial += $partial;
             $sum_all += $total;
         }
 
         $datas['total'] = $sum_all;
         $datas['rate'] = $sum_all ? $sum_ok / $sum_all * 100 : 0;
+        $datas['accepted'] = $sum_ok;
+        $datas['refused'] = $sum_ko;
+        $datas['partial'] = $sum_partial;
         return $datas;
     }
 

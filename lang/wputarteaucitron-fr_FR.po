@@ -259,10 +259,18 @@ msgid "Last 30 days."
 msgstr "30 derniers jours."
 
 #: wputarteaucitron.php
-msgid "%1$s decision, %2$s%% accepted over the period."
-msgid_plural "%1$s decisions, %2$s%% accepted over the period."
-msgstr[0] "%1$s décision, %2$s%% d’acceptation sur la période."
-msgstr[1] "%1$s décisions, %2$s%% d’acceptation sur la période."
+msgid "%1$s decision : %2$s accepted, %3$s refused, %4$s partial — %5$s%% acceptance over the period."
+msgid_plural "%1$s decisions : %2$s accepted, %3$s refused, %4$s partial — %5$s%% acceptance over the period."
+msgstr[0] "%1$s décision : %2$s acceptée, %3$s refusée, %4$s partielle — %5$s%% d’acceptation sur la période."
+msgstr[1] "%1$s décisions : %2$s acceptées, %3$s refusées, %4$s partielles — %5$s%% d’acceptation sur la période."
+
+#: wputarteaucitron.php
+msgid "7 days"
+msgstr "7 jours"
+
+#: wputarteaucitron.php
+msgid "15 days"
+msgstr "15 jours"
 
 #: wputarteaucitron.php
 msgid "30 days"
