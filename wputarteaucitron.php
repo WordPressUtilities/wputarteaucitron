@@ -5,7 +5,7 @@ Plugin Name: WPU Tarte Au Citron
 Plugin URI: https://github.com/WordPressUtilities/wputarteaucitron
 Update URI: https://github.com/WordPressUtilities/wputarteaucitron
 Description: Simple implementation for Tarteaucitron.js
-Version: 1.6.2
+Version: 1.7.0
 Author: Darklg
 Author URI: https://darklg.me/
 Text Domain: wputarteaucitron
@@ -22,13 +22,14 @@ class WPUTarteAuCitron {
     public $plugin_description;
     public $settings_details;
     public $settings;
-    private $plugin_version = '1.6.2';
+    private $plugin_version = '1.7.0';
     private $tarteaucitron_version = '1.35.0';
     private $settings_obj;
     private $stats_obj = false;
     private $prefix_stat = 'wputarteaucitron_stat_';
     private $stats_table_name = 'wputarteaucitron_stats';
     const STATS_DEFAULT_PERIOD = 15;
+    const STATS_SHORT_PERIOD = 7;
     private $plugin_settings = array(
         'id' => 'wputarteaucitron',
         'name' => 'WPU Tarte Au Citron'
@@ -661,8 +662,70 @@ class WPUTarteAuCitron {
         $was_enabled = is_array($old_value) && isset($old_value['enable_logs']) && $old_value['enable_logs'] == '1';
         $is_enabled = is_array($new_value) && isset($new_value['enable_logs']) && $new_value['enable_logs'] == '1';
         if ($is_enabled && !$was_enabled) {
+            $this->stats_archive_counters();
             $this->stats_reset();
         }
+    }
+
+    /**
+     * Snapshot the legacy counters before they are reset, so they stay consultable
+     */
+    public function stats_archive_counters() {
+        $totals = $this->stats_get_totals_from_counters();
+        if (!$totals) {
+            return;
+        }
+
+        $archive = $this->stats_get_archive();
+        $since = $this->stats_get_since();
+        if ($archive) {
+            /* Several on/off cycles : totals are summed, the oldest start date wins */
+            $since = min($since, $archive['since']);
+            foreach ($archive['totals'] as $key => $values) {
+                $totals[$key] = array(
+                    'allowed' => (isset($totals[$key]) ? $totals[$key]['allowed'] : 0) + $values['allowed'],
+                    'refused' => (isset($totals[$key]) ? $totals[$key]['refused'] : 0) + $values['refused']
+                );
+            }
+        }
+
+        update_option($this->prefix_stat . 'archive', array(
+            'since' => intval($since),
+            'until' => time(),
+            'totals' => $totals
+        ), false);
+    }
+
+    /**
+     * @return array|false  Archived counters, false if there is none
+     */
+    public function stats_get_archive() {
+        $archive = get_option($this->prefix_stat . 'archive');
+        if (!is_array($archive) || empty($archive['totals'])) {
+            return false;
+        }
+        return $archive;
+    }
+
+    /**
+     * Read only display of the counters frozen when logs were enabled
+     */
+    public function stats_display_archive() {
+        $archive = $this->stats_get_archive();
+        if (!$archive) {
+            return;
+        }
+        $table = $this->stats_display_table($archive['totals']);
+        if (!$table) {
+            return;
+        }
+
+        $date_format = get_option('date_format');
+        echo '<details style="margin-top:2em">';
+        echo '<summary>' . esc_html(sprintf(__('Previous history (counters stopped on %s)', 'wputarteaucitron'), wp_date($date_format, $archive['until']))) . '</summary>';
+        echo $table;
+        echo '<p>' . esc_html(sprintf(__('From %1$s to %2$s.', 'wputarteaucitron'), wp_date($date_format, $archive['since']), wp_date($date_format, $archive['until']))) . '</p>';
+        echo '</details>';
     }
 
     /* ----------------------------------------------------------
@@ -828,6 +891,7 @@ class WPUTarteAuCitron {
 
         if (!$chart['labels']) {
             echo '<p>' . esc_html__('No stats yet.', 'wputarteaucitron') . '</p>';
+            $this->stats_display_archive();
             echo '</div>';
             return;
         }
@@ -859,6 +923,8 @@ class WPUTarteAuCitron {
         echo 'plugins:{tooltip:{callbacks:{label:function(c){return c.parsed.y.toFixed(2)+"% ("+d.totals[c.dataIndex]+")";}}}}}});';
         echo '}init();}());</script>';
 
+        $this->stats_display_archive();
+
         echo '</div>';
     }
 
@@ -879,10 +945,30 @@ class WPUTarteAuCitron {
     private function stats_get_current_period() {
         $periods = $this->stats_get_periods();
         $period = isset($_GET['wputac_period']) ? intval($_GET['wputac_period']) : 0;
-        if (!isset($periods[$period])) {
-            $period = self::STATS_DEFAULT_PERIOD;
+        if (isset($periods[$period])) {
+            return $period;
         }
-        return $period;
+
+        /* A fresh install has no data over the default period : fall back on the shortest one */
+        $first_day = $this->stats_get_first_day();
+        if ($first_day && $first_day > time() - self::STATS_DEFAULT_PERIOD * DAY_IN_SECONDS) {
+            return self::STATS_SHORT_PERIOD;
+        }
+
+        return self::STATS_DEFAULT_PERIOD;
+    }
+
+    /**
+     * Timestamp of the oldest logged day
+     * @return int|false
+     */
+    private function stats_get_first_day() {
+        if (!$this->stats_obj) {
+            return false;
+        }
+        global $wpdb;
+        $first_day = $wpdb->get_var("SELECT MIN(`day`) FROM " . $this->stats_obj->tablename);
+        return $first_day ? strtotime($first_day) : false;
     }
 
     private function stats_get_current_service() {
@@ -893,12 +979,19 @@ class WPUTarteAuCitron {
         return $service;
     }
 
-    private function stats_get_filters_html($period, $service) {
-        /* Resolves the real parent page, which is filterable in WPUBaseSettings */
+    /**
+     * Settings page URL : resolves the real parent page, which is filterable in WPUBaseSettings
+     */
+    private function stats_get_admin_url() {
         $base_url = menu_page_url($this->plugin_settings['id'], false);
         if (!$base_url) {
             $base_url = admin_url('options-general.php?page=' . $this->plugin_settings['id']);
         }
+        return $base_url;
+    }
+
+    private function stats_get_filters_html($period, $service) {
+        $base_url = $this->stats_get_admin_url();
 
         $periods = $this->stats_get_periods();
 
@@ -1083,6 +1176,11 @@ class WPUTarteAuCitron {
             echo '<p>' . esc_html__('No stats yet.', 'wputarteaucitron') . '</p>';
         } else {
             echo $out;
+        }
+
+        /* The widget is visible to edit_users, the settings page needs its own cap */
+        if (current_user_can($this->settings_details['user_cap'])) {
+            echo '<p><a href="' . esc_url($this->stats_get_admin_url()) . '">' . esc_html(__('Settings', 'wputarteaucitron')) . '</a></p>';
         }
     }
 
