@@ -5,7 +5,7 @@ Plugin Name: WPU Tarte Au Citron
 Plugin URI: https://github.com/WordPressUtilities/wputarteaucitron
 Update URI: https://github.com/WordPressUtilities/wputarteaucitron
 Description: Simple implementation for Tarteaucitron.js
-Version: 1.7.0
+Version: 1.7.1
 Author: Darklg
 Author URI: https://darklg.me/
 Text Domain: wputarteaucitron
@@ -22,7 +22,7 @@ class WPUTarteAuCitron {
     public $plugin_description;
     public $settings_details;
     public $settings;
-    private $plugin_version = '1.7.0';
+    private $plugin_version = '1.7.1';
     private $tarteaucitron_version = '1.35.0';
     private $settings_obj;
     private $stats_obj = false;
@@ -132,14 +132,6 @@ class WPUTarteAuCitron {
         add_action('wp_ajax_wputarteaucitron_status', array(&$this, 'callback_ajax'));
         add_action('wp_ajax_nopriv_wputarteaucitron_status', array(&$this, 'callback_ajax'));
 
-        # Admin
-        add_action('wpubasesettings_after_content_settings_page_wputarteaucitron', array(&$this, 'stats_display'));
-        add_action('wpubasesettings_after_content_settings_page_wputarteaucitron', array(&$this, 'info_display'));
-        add_action('load-settings_page_wputarteaucitron', array(&$this, 'stats_reset_action'));
-        add_action('admin_enqueue_scripts', array(&$this, 'admin_enqueue_scripts'));
-
-        # Reset legacy counters when logs are enabled
-        add_action('update_option_' . $this->plugin_settings['id'] . '_options', array(&$this, 'stats_logs_activation'), 10, 2);
     }
 
     public function load_translation() {
@@ -328,6 +320,17 @@ class WPUTarteAuCitron {
 
         /* Admin widget */
         add_action('wp_dashboard_setup', array(&$this, 'wputarteaucitron_add_dashboard_widget'));
+
+        # Admin
+        add_action('wpubasesettings_after_content_settings_page_wputarteaucitron', array(&$this, 'stats_display'));
+        add_action('wpubasesettings_after_content_admin_page_wputarteaucitron', array(&$this, 'stats_display'));
+        add_action('wpubasesettings_after_content_settings_page_wputarteaucitron', array(&$this, 'info_display'));
+        add_action('wpubasesettings_after_content_admin_page_wputarteaucitron', array(&$this, 'info_display'));
+        add_action('load-settings_page_wputarteaucitron', array(&$this, 'stats_reset_action'));
+        add_action('admin_enqueue_scripts', array(&$this, 'admin_enqueue_scripts'));
+
+        # Reset legacy counters when logs are enabled
+        add_action('update_option_' . $this->plugin_settings['id'] . '_options', array(&$this, 'stats_logs_activation'), 10, 2);
     }
 
     public function get_field_setting($args = array()) {
