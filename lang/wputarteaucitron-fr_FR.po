@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: WPU Tarte Au Citron\n"
-"POT-Creation-Date: 2026-10-05 22:13+0200\n"
+"POT-Creation-Date: 2026-10-30 22:46+0100\n"
 "PO-Revision-Date: \n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -14,7 +14,7 @@ msgstr ""
 "X-Poedit-Basepath: .\n"
 "X-Poedit-KeywordsList: "
 "__;_e;_x:1,2c;_n:1,2;esc_attr__;esc_html__;esc_attr_e;esc_html_e\n"
-"X-Generator: Poedit 3.9\n"
+"X-Generator: Poedit 3.10\n"
 "X-Poedit-SearchPath-0: ../.\n"
 
 #: .././inc/WPUBaseAdminDatas/WPUBaseAdminDatas.php:647
@@ -32,13 +32,13 @@ msgstr "Sélectionnez un article"
 
 #: .././inc/WPUBaseAdminDatas/WPUBaseAdminDatas.php:684
 #: .././inc/WPUBaseSettings/WPUBaseSettings.php:233
-#: .././wputarteaucitron.php:194
+#: .././wputarteaucitron.php:186
 msgid "No"
 msgstr "Non"
 
 #: .././inc/WPUBaseAdminDatas/WPUBaseAdminDatas.php:685
 #: .././inc/WPUBaseSettings/WPUBaseSettings.php:233
-#: .././wputarteaucitron.php:194
+#: .././wputarteaucitron.php:186
 msgid "Yes"
 msgstr "Oui"
 
@@ -99,7 +99,7 @@ msgstr "Exporter la vue filtrée"
 #: .././inc/WPUBaseSettings/WPUBaseSettings.php:203
 #: .././inc/WPUBaseSettings/WPUBaseSettings.php:824
 #: .././inc/WPUBaseSettings/WPUBaseSettings.php:846
-#: .././wputarteaucitron.php:169 .././wputarteaucitron.php:1183
+#: .././wputarteaucitron.php:161 .././wputarteaucitron.php:1268
 msgid "Settings"
 msgstr "Réglages"
 
@@ -128,66 +128,66 @@ msgstr ""
 "ici."
 
 #: .././inc/WPUBaseSettings/WPUBaseSettings.php:712
+#: .././wputarteaucitron.php:530
 msgid "Language"
 msgstr "Langue"
 
 #: .././inc/WPUBaseSettings/WPUBaseSettings.php:834
 msgid "You do not have sufficient permissions to access this page."
 msgstr ""
-"Vous ne disposez pas des droits d'accès suffisants pour consulter cette "
-"page."
+"Vous ne disposez pas des droits d'accès suffisants pour consulter cette page."
 
 #: .././inc/WPUBaseSettings/WPUBaseSettings.php:864
 msgid "Save"
 msgstr "Sauvegarder"
 
-#: .././wputarteaucitron.php:152
+#: .././wputarteaucitron.php:144
 msgid "Simple implementation for Tarteaucitron.js"
 msgstr "Une implementation simple pour Tarteaucitron.js"
 
-#: .././wputarteaucitron.php:172
+#: .././wputarteaucitron.php:164
 msgid "Icon"
 msgstr "Icône"
 
-#: .././wputarteaucitron.php:176
+#: .././wputarteaucitron.php:168
 msgid "Banner"
 msgstr "Bannière"
 
-#: .././wputarteaucitron.php:180
+#: .././wputarteaucitron.php:172
 msgid "Trackers - Google"
 msgstr "Trackers - Google"
 
-#: .././wputarteaucitron.php:184
+#: .././wputarteaucitron.php:176
 msgid "Trackers - Matomo"
 msgstr ""
 "Trackers\n"
 " - Matomo"
 
-#: .././wputarteaucitron.php:188
+#: .././wputarteaucitron.php:180
 msgid "Trackers"
 msgstr "Trackers"
 
-#: .././wputarteaucitron.php:200
+#: .././wputarteaucitron.php:192
 msgid "Activate banner"
 msgstr "Activer la bannière"
 
-#: .././wputarteaucitron.php:202
+#: .././wputarteaucitron.php:194
 msgid "Banner will be visible and scripts will be loaded"
 msgstr "La bannière sera visible et les scripts seront chargés"
 
-#: .././wputarteaucitron.php:209
+#: .././wputarteaucitron.php:201
 msgid "Disable banner for logged in users"
 msgstr "Désactiver la bannière pour les utilisateurs connectés"
 
-#: .././wputarteaucitron.php:211
+#: .././wputarteaucitron.php:203
 msgid "Banner will be visible only for non-logged in users"
 msgstr "La bannière ne sera visible que pour les utilisateurs non connectés"
 
-#: .././wputarteaucitron.php:218
+#: .././wputarteaucitron.php:210
 msgid "Log consent history"
 msgstr "Historiser les consentements"
 
-#: .././wputarteaucitron.php:219
+#: .././wputarteaucitron.php:211
 msgid ""
 "Stores a daily count of choices and displays an acceptance rate chart "
 "instead of the current totals. Enabling this resets the current counters."
@@ -196,80 +196,80 @@ msgstr ""
 "d’acceptation à la place des totaux actuels. L’activation réinitialise les "
 "compteurs actuels."
 
-#: .././wputarteaucitron.php:226
+#: .././wputarteaucitron.php:218
 msgid "Privacy URL"
 msgstr "URL de la page de confidentialité"
 
-#: .././wputarteaucitron.php:234
+#: .././wputarteaucitron.php:226
 msgid "Custom Icon"
 msgstr "Icône personnalisée"
 
-#: .././wputarteaucitron.php:239
+#: .././wputarteaucitron.php:231
 msgid "Show icon"
 msgstr "Afficher l’icône"
 
-#: .././wputarteaucitron.php:241
+#: .././wputarteaucitron.php:233
 #, php-format
 msgid "Or create a link to reopen the popup : %s"
 msgstr "Ou créez un lien pour rouvrir le popup : %s"
 
-#: .././wputarteaucitron.php:248
+#: .././wputarteaucitron.php:240
 msgid "Icon position"
 msgstr "Position de l'icône"
 
-#: .././wputarteaucitron.php:251
+#: .././wputarteaucitron.php:243
 msgid "Bottom Right"
 msgstr "En bas à droite"
 
-#: .././wputarteaucitron.php:252
+#: .././wputarteaucitron.php:244
 msgid "Bottom Left"
 msgstr "En bas à gauche"
 
-#: .././wputarteaucitron.php:253
+#: .././wputarteaucitron.php:245
 msgid "Top Right"
 msgstr "En haut à droite"
 
-#: .././wputarteaucitron.php:254
+#: .././wputarteaucitron.php:246
 msgid "Top Left"
 msgstr "En haut à gauche"
 
-#: .././wputarteaucitron.php:259
+#: .././wputarteaucitron.php:251
 msgid "Banner position"
 msgstr "Position de la bannière"
 
-#: .././wputarteaucitron.php:262
+#: .././wputarteaucitron.php:254
 msgid "Bottom"
 msgstr "En bas"
 
-#: .././wputarteaucitron.php:263
+#: .././wputarteaucitron.php:255
 msgid "Middle"
 msgstr "Au milieu"
 
-#: .././wputarteaucitron.php:264
+#: .././wputarteaucitron.php:256
 msgid "Top"
 msgstr "En haut"
 
-#: .././wputarteaucitron.php:265
+#: .././wputarteaucitron.php:257
 msgid "Popup"
 msgstr "Popup"
 
-#: .././wputarteaucitron.php:270
+#: .././wputarteaucitron.php:262
 msgid "Banner message"
 msgstr "Message de la bannière"
 
-#: .././wputarteaucitron.php:276
+#: .././wputarteaucitron.php:268
 msgid "Display the “Accept All” CTA"
 msgstr "Afficher le CTA « Accepter tout »"
 
-#: .././wputarteaucitron.php:282
+#: .././wputarteaucitron.php:274
 msgid "Display the “Deny All” CTA"
 msgstr "Afficher le CTA « Refuser tout »"
 
-#: .././wputarteaucitron.php:288
+#: .././wputarteaucitron.php:280
 msgid "Blocking overlay"
 msgstr "Voile bloquant"
 
-#: .././wputarteaucitron.php:289
+#: .././wputarteaucitron.php:281
 msgid ""
 "Blocks the page until a choice is made. The “Deny All” CTA is forced on for "
 "legal compliance."
@@ -277,11 +277,11 @@ msgstr ""
 "Bloque la page tant qu’aucun choix n’est fait. Le CTA « Refuser tout » est "
 "forcé pour des raisons de conformité légale."
 
-#: .././wputarteaucitron.php:296
+#: .././wputarteaucitron.php:288
 msgid "Disable Google Consent Mode"
 msgstr "Désactiver Google Consent Mode"
 
-#: .././wputarteaucitron.php:297
+#: .././wputarteaucitron.php:289
 msgid ""
 "If you use Google Consent Mode elsewhere, you can disable it here to avoid "
 "conflicts"
@@ -289,67 +289,67 @@ msgstr ""
 "Si vous utilisez le consent mode de Google ailleurs, vous pouvez le "
 "désactiver ici pour éviter les conflits"
 
-#: .././wputarteaucitron.php:349
+#: .././wputarteaucitron.php:352
 #, php-format
 msgid "Example: %s"
 msgstr "Exemple: %s"
 
-#: .././wputarteaucitron.php:517
+#: .././wputarteaucitron.php:522
 msgid "Day"
 msgstr "Jour"
 
-#: .././wputarteaucitron.php:521
+#: .././wputarteaucitron.php:526
 msgid "Service"
 msgstr "Service"
 
-#: .././wputarteaucitron.php:525 .././wputarteaucitron.php:838
+#: .././wputarteaucitron.php:536 .././wputarteaucitron.php:868
 msgid "Accepted"
 msgstr "Accepté"
 
-#: .././wputarteaucitron.php:530 .././wputarteaucitron.php:839
+#: .././wputarteaucitron.php:541 .././wputarteaucitron.php:869
 msgid "Refused"
 msgstr "Refusé"
 
-#: .././wputarteaucitron.php:535
+#: .././wputarteaucitron.php:546
 msgid "Partial"
 msgstr "Partiel"
 
-#: .././wputarteaucitron.php:725
+#: .././wputarteaucitron.php:755
 #, php-format
 msgid "Previous history (counters stopped on %s)"
 msgstr "Historique (compteurs arrêtés le %s)"
 
-#: .././wputarteaucitron.php:727
+#: .././wputarteaucitron.php:757
 #, php-format
 msgid "From %1$s to %2$s."
 msgstr "De %1$s à %2$s."
 
-#: .././wputarteaucitron.php:837
+#: .././wputarteaucitron.php:867
 msgid "Total"
 msgstr "Total"
 
-#: .././wputarteaucitron.php:855 .././wputarteaucitron.php:888
+#: .././wputarteaucitron.php:885 .././wputarteaucitron.php:919
 msgid "Stats"
 msgstr "Statistiques"
 
-#: .././wputarteaucitron.php:861
+#: .././wputarteaucitron.php:891
 #, php-format
 msgid "Since %s"
 msgstr "Depuis le %s"
 
-#: .././wputarteaucitron.php:864
+#: .././wputarteaucitron.php:894
 msgid "Reset stats"
 msgstr "Réinitialiser les statistiques"
 
-#: .././wputarteaucitron.php:878
+#: .././wputarteaucitron.php:908
 msgid "Last 30 days."
 msgstr "30 derniers jours."
 
-#: .././wputarteaucitron.php:893 .././wputarteaucitron.php:1176
+#: .././wputarteaucitron.php:924 .././wputarteaucitron.php:1261
 msgid "No stats yet."
 msgstr "Pas encore de statistiques."
 
-#: .././wputarteaucitron.php:902
+#: .././wputarteaucitron.php:933
 #, php-format
 msgid ""
 "%1$s decision : %2$s accepted, %3$s refused, %4$s partial — %5$s%% "
@@ -364,35 +364,43 @@ msgstr[1] ""
 "%1$s décisions : %2$s acceptées, %3$s refusées, %4$s partielles — %5$s%% "
 "d’acceptation sur la période."
 
-#: .././wputarteaucitron.php:937
+#: .././wputarteaucitron.php:968
 msgid "7 days"
 msgstr "7 jours"
 
-#: .././wputarteaucitron.php:938
+#: .././wputarteaucitron.php:969
 msgid "15 days"
 msgstr "15 jours"
 
-#: .././wputarteaucitron.php:939
+#: .././wputarteaucitron.php:970
 msgid "30 days"
 msgstr "30 jours"
 
-#: .././wputarteaucitron.php:940
+#: .././wputarteaucitron.php:971
 msgid "90 days"
 msgstr "90 jours"
 
-#: .././wputarteaucitron.php:941
+#: .././wputarteaucitron.php:972
 msgid "12 months"
 msgstr "12 mois"
 
-#: .././wputarteaucitron.php:998
+#: .././wputarteaucitron.php:1051
 msgid "Global"
 msgstr "Global"
 
-#: .././wputarteaucitron.php:1075
+#: .././wputarteaucitron.php:1085
+msgid "All languages"
+msgstr "Toutes les langues"
+
+#: .././wputarteaucitron.php:1087
+msgid "Undefined"
+msgstr "Non définie"
+
+#: .././wputarteaucitron.php:1160
 msgid "Global acceptance rate"
 msgstr "Taux d’acceptation global"
 
-#: .././wputarteaucitron.php:1076
+#: .././wputarteaucitron.php:1161
 #, php-format
 msgid "Acceptance rate : %s"
 msgstr "Taux d’acceptation : %s"

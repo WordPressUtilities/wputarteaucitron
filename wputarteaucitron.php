@@ -5,7 +5,7 @@ Plugin Name: WPU Tarte Au Citron
 Plugin URI: https://github.com/WordPressUtilities/wputarteaucitron
 Update URI: https://github.com/WordPressUtilities/wputarteaucitron
 Description: Simple implementation for Tarteaucitron.js
-Version: 1.7.1
+Version: 1.8.0
 Author: Darklg
 Author URI: https://darklg.me/
 Text Domain: wputarteaucitron
@@ -22,8 +22,8 @@ class WPUTarteAuCitron {
     public $plugin_description;
     public $settings_details;
     public $settings;
-    private $plugin_version = '1.7.1';
-    private $tarteaucitron_version = '1.35.0';
+    private $plugin_version = '1.8.0';
+    private $tarteaucitron_version = '1.37.0';
     private $settings_obj;
     private $stats_obj = false;
     private $prefix_stat = 'wputarteaucitron_stat_';
@@ -392,6 +392,7 @@ class WPUTarteAuCitron {
         $script_settings = array(
             'ajax_url' => admin_url('admin-ajax.php'),
             'nonce' => wp_create_nonce('wputarteaucitron_nonce'),
+            'lang' => $current_lang,
             'accept_all_cta' => !isset($settings['display_accept_all_cta']) || $settings['display_accept_all_cta'],
             'deny_all_cta' => isset($settings['display_deny_all_cta']) && $settings['display_deny_all_cta'],
             /* Never block the privacy page: users must be able to read it before choosing */
@@ -486,7 +487,8 @@ class WPUTarteAuCitron {
         }
 
         if ($this->stats_logs_enabled()) {
-            $this->stats_log_decision($statuses);
+            $lang = isset($_POST['lang']) ? sanitize_text_field(wp_unslash($_POST['lang'])) : '';
+            $this->stats_log_decision($statuses, $this->stats_sanitize_lang($lang));
         } else {
             $this->stats_increment_counters($statuses);
         }
@@ -524,6 +526,12 @@ class WPUTarteAuCitron {
                     'public_name' => __('Service', 'wputarteaucitron'),
                     'type' => 'varchar'
                 ),
+                'lang' => array(
+                    'public_name' => __('Language', 'wputarteaucitron'),
+                    'type' => 'sql',
+                    /* NOT NULL is required : NULL values would bypass the unique key */
+                    'sql' => "VARCHAR(20) NOT NULL DEFAULT ''"
+                ),
                 'nb_ok' => array(
                     'public_name' => __('Accepted', 'wputarteaucitron'),
                     'type' => 'sql',
@@ -544,10 +552,13 @@ class WPUTarteAuCitron {
 
         /* WPUBaseAdminDatas does not handle indexes : the unique key is required by the upsert */
         $opt_index = $this->prefix_stat . 'table_index';
-        if (get_option($opt_index) != '1') {
+        $index_version = get_option($opt_index);
+        if ($index_version != '2') {
             global $wpdb;
-            $wpdb->query("ALTER TABLE " . $this->stats_obj->tablename . " ADD UNIQUE KEY day_service (`day`, `service`)");
-            update_option($opt_index, '1', false);
+            /* Single query : the table is never left without a unique key */
+            $drop_old = $index_version == '1' ? 'DROP INDEX day_service, ' : '';
+            $wpdb->query("ALTER TABLE " . $this->stats_obj->tablename . " " . $drop_old . "ADD UNIQUE KEY day_service_lang (`day`, `service`, `lang`)");
+            update_option($opt_index, '2', false);
         }
     }
 
@@ -583,9 +594,10 @@ class WPUTarteAuCitron {
 
     /**
      * Store a full modal decision : one row per service, plus a global row
-     * @param array $statuses  [service_key => 0|1]
+     * @param array  $statuses  [service_key => 0|1]
+     * @param string $lang      Language code, '' if unknown
      */
-    public function stats_log_decision($statuses) {
+    public function stats_log_decision($statuses, $lang = '') {
         if (!$this->stats_obj) {
             return;
         }
@@ -594,7 +606,7 @@ class WPUTarteAuCitron {
         $day = wp_date('Y-m-d');
 
         foreach ($statuses as $service_key => $status) {
-            $this->stats_increment_row($day, $service_key, $status ? 'nb_ok' : 'nb_ko');
+            $this->stats_increment_row($day, $service_key, $lang, $status ? 'nb_ok' : 'nb_ko');
         }
 
         $values = array_values($statuses);
@@ -604,20 +616,35 @@ class WPUTarteAuCitron {
         } elseif (!in_array(1, $values, true)) {
             $global_column = 'nb_ko';
         }
-        $this->stats_increment_row($day, '_global', $global_column);
+        $this->stats_increment_row($day, '_global', $lang, $global_column);
     }
 
     /**
-     * Atomic increment of one counter, relies on the UNIQUE (day, service) key
+     * Only keep languages known by the multilingual plugin : the value comes from the browser
      */
-    private function stats_increment_row($day, $service, $column) {
+    private function stats_sanitize_lang($lang) {
+        if (!$lang) {
+            return '';
+        }
+        /* Polylang & WPML return [code => name], qTranslate a list of codes */
+        $languages = $this->settings_obj->get_languages();
+        if (isset($languages[$lang]) || in_array($lang, $languages, true)) {
+            return $lang;
+        }
+        return '';
+    }
+
+    /**
+     * Atomic increment of one counter, relies on the UNIQUE (day, service, lang) key
+     */
+    private function stats_increment_row($day, $service, $lang, $column) {
         /* $column is never user input : it is one of the three hardcoded names above */
         global $wpdb;
         $table = $this->stats_obj->tablename;
         $wpdb->query($wpdb->prepare(
-            "INSERT INTO {$table} (`day`, `service`, `{$column}`) VALUES (%s, %s, 1)
+            "INSERT INTO {$table} (`day`, `service`, `lang`, `{$column}`) VALUES (%s, %s, %s, 1)
              ON DUPLICATE KEY UPDATE `{$column}` = `{$column}` + 1",
-            $day, $service
+            $day, $service, $lang
         ));
     }
 
@@ -884,13 +911,14 @@ class WPUTarteAuCitron {
 
         $period = $this->stats_get_current_period();
         $service = $this->stats_get_current_service();
-        $chart = $this->stats_get_chart_datas($service, $period);
+        $lang = $this->stats_get_current_lang();
+        $chart = $this->stats_get_chart_datas($service, $period, $lang);
 
         echo '<hr />';
         echo '<div id="' . esc_attr($this->plugin_settings['id']) . '-stats" style="max-width:800px">';
         echo '<h2>' . __('Stats', 'wputarteaucitron') . '</h2>';
 
-        echo $this->stats_get_filters_html($period, $service);
+        echo $this->stats_get_filters_html($period, $service, $lang);
 
         if (!$chart['labels']) {
             echo '<p>' . esc_html__('No stats yet.', 'wputarteaucitron') . '</p>';
@@ -983,6 +1011,28 @@ class WPUTarteAuCitron {
     }
 
     /**
+     * '_all' sums every language, '' targets decisions without a known language
+     */
+    private function stats_get_current_lang() {
+        $lang = isset($_GET['wputac_lang']) ? sanitize_text_field(wp_unslash($_GET['wputac_lang'])) : '_all';
+        if ($lang != '_all' && !in_array($lang, $this->stats_get_logged_langs(), true)) {
+            $lang = '_all';
+        }
+        return $lang;
+    }
+
+    /**
+     * Languages having at least one logged row : removed languages stay visible
+     */
+    private function stats_get_logged_langs() {
+        if (!$this->stats_obj) {
+            return array();
+        }
+        global $wpdb;
+        return $wpdb->get_col("SELECT DISTINCT `lang` FROM " . $this->stats_obj->tablename . " ORDER BY `lang` ASC");
+    }
+
+    /**
      * Settings page URL : resolves the real parent page, which is filterable in WPUBaseSettings
      */
     private function stats_get_admin_url() {
@@ -993,7 +1043,7 @@ class WPUTarteAuCitron {
         return $base_url;
     }
 
-    private function stats_get_filters_html($period, $service) {
+    private function stats_get_filters_html($period, $service, $lang) {
         $base_url = $this->stats_get_admin_url();
 
         $periods = $this->stats_get_periods();
@@ -1006,21 +1056,47 @@ class WPUTarteAuCitron {
         /* Anchor : the stats block sits at the bottom of a long settings page */
         $anchor = '#' . $this->plugin_settings['id'] . '-stats';
 
-        $html = '<p>';
-        foreach ($services as $key => $label) {
-            $url = add_query_arg(array('wputac_period' => $period, 'wputac_service' => $key), $base_url) . $anchor;
-            $html .= $key == $service
-            ? '<strong style="margin-right:1em">' . esc_html($label) . '</strong>'
-            : '<a style="margin-right:1em" href="' . esc_url($url) . '">' . esc_html($label) . '</a>';
+        $html = '';
+
+        if (count($services) > 2) {
+            $html .= '<p>';
+            foreach ($services as $key => $label) {
+                $url = add_query_arg(array('wputac_period' => $period, 'wputac_service' => $key, 'wputac_lang' => $lang), $base_url) . $anchor;
+                $html .= $key == $service
+                ? '<strong style="margin-right:1em">' . esc_html($label) . '</strong>'
+                : '<a style="margin-right:1em" href="' . esc_url($url) . '">' . esc_html($label) . '</a>';
+            }
+            $html .= '</p>';
         }
-        $html .= '</p><p>';
+
+        $html .= '</p>';
         foreach ($periods as $key => $label) {
-            $url = add_query_arg(array('wputac_period' => $key, 'wputac_service' => $service), $base_url) . $anchor;
+            $url = add_query_arg(array('wputac_period' => $key, 'wputac_service' => $service, 'wputac_lang' => $lang), $base_url) . $anchor;
             $html .= $key == $period
             ? '<strong style="margin-right:1em">' . esc_html($label) . '</strong>'
             : '<a style="margin-right:1em" href="' . esc_url($url) . '">' . esc_html($label) . '</a>';
         }
         $html .= '</p>';
+
+        /* Language filter is useless when every decision shares the same language */
+        $logged_langs = $this->stats_get_logged_langs();
+        if (count($logged_langs) > 1) {
+            $languages = $this->settings_obj->get_languages();
+            $langs = array('_all' => __('All languages', 'wputarteaucitron'));
+            foreach ($logged_langs as $key) {
+                $langs[$key] = $key === '' ? __('Undefined', 'wputarteaucitron') : (isset($languages[$key]) ? $languages[$key] : $key);
+            }
+            $html .= '<p>';
+            foreach ($langs as $key => $label) {
+                /* Cast : PHP turns numeric-looking array keys into integers */
+                $key = (string) $key;
+                $url = add_query_arg(array('wputac_period' => $period, 'wputac_service' => $service, 'wputac_lang' => $key), $base_url) . $anchor;
+                $html .= $key === $lang
+                ? '<strong style="margin-right:1em">' . esc_html($label) . '</strong>'
+                : '<a style="margin-right:1em" href="' . esc_url($url) . '">' . esc_html($label) . '</a>';
+            }
+            $html .= '</p>';
+        }
         return $html;
     }
 
@@ -1042,7 +1118,7 @@ class WPUTarteAuCitron {
     /**
      * Acceptance rate over time for one service
      */
-    public function stats_get_chart_datas($service, $period) {
+    public function stats_get_chart_datas($service, $period, $lang = '_all') {
         $empty = array('labels' => array(), 'rates' => array(), 'totals' => array(), 'label' => '', 'total' => 0, 'rate' => 0, 'accepted' => 0, 'refused' => 0, 'partial' => 0);
         if (!$this->stats_obj) {
             return $empty;
@@ -1056,10 +1132,16 @@ class WPUTarteAuCitron {
         global $wpdb;
         $table = $this->stats_obj->tablename;
         $since = wp_date('Y-m-d', time() - $period * DAY_IN_SECONDS);
+        $args = array($service, $since);
+        $where_lang = '';
+        if ($lang != '_all') {
+            $where_lang = ' AND `lang` = %s';
+            $args[] = $lang;
+        }
         $results = $wpdb->get_results($wpdb->prepare(
             "SELECT {$bucket} AS bucket, SUM(`nb_ok`) AS nb_ok, SUM(`nb_ko`) AS nb_ko, SUM(`nb_partial`) AS nb_partial
-             FROM {$table} WHERE `service` = %s AND `day` >= %s GROUP BY bucket ORDER BY bucket ASC",
-            $service, $since
+             FROM {$table} WHERE `service` = %s AND `day` >= %s{$where_lang} GROUP BY bucket ORDER BY bucket ASC",
+            $args
         ));
 
         if (!$results) {

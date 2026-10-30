@@ -154,6 +154,7 @@ function wputarteaucitron_flush_ajax_status() {
     var form_data = new FormData();
     form_data.append('action', 'wputarteaucitron_status');
     form_data.append('_ajax_nonce', wputarteaucitron_settings.nonce);
+    form_data.append('lang', wputarteaucitron_settings.lang);
     for (service in statuses) {
         form_data.append('services[' + service + ']', statuses[service]);
     }
