@@ -5,7 +5,7 @@ Plugin Name: WPU Tarte Au Citron
 Plugin URI: https://github.com/WordPressUtilities/wputarteaucitron
 Update URI: https://github.com/WordPressUtilities/wputarteaucitron
 Description: Simple implementation for Tarteaucitron.js
-Version: 1.8.0
+Version: 1.9.0
 Author: Darklg
 Author URI: https://darklg.me/
 Text Domain: wputarteaucitron
@@ -22,7 +22,7 @@ class WPUTarteAuCitron {
     public $plugin_description;
     public $settings_details;
     public $settings;
-    private $plugin_version = '1.8.0';
+    private $plugin_version = '1.9.0';
     private $tarteaucitron_version = '1.37.0';
     private $settings_obj;
     private $stats_obj = false;
@@ -88,13 +88,31 @@ class WPUTarteAuCitron {
             'setting_key' => 'hubspot_api_key',
             'user_key' => 'hubspotId'
         ),
+        'pardot' => array(
+            'section' => 'trackers_pardot',
+            'label' => 'Pardot piAId',
+            'setting_key' => 'pardot_piaid',
+            'user_key' => 'piAId',
+            'example' => '123456',
+            'extra_settings' => array(
+                'pardot_picid' => array(
+                    'section' => 'trackers_pardot',
+                    'label' => 'Pardot piCId',
+                    'setting_key' => 'pardot_picid',
+                    'user_key' => 'piCId',
+                    'example' => '1234'
+                )
+            )
+        ),
         'hotjar' => array(
+            'section' => 'trackers_hotjar',
             'label' => 'Hotjar',
             'setting_key' => 'hotjar_id',
             'user_key' => 'hotjarId',
             'example' => '1234567',
             'extra_settings' => array(
                 'hotjar_sv' => array(
+                    'section' => 'trackers_hotjar',
                     'label' => 'Hotjar SV',
                     'setting_key' => 'hotjar_sv',
                     'user_key' => 'HotjarSv',
@@ -172,12 +190,20 @@ class WPUTarteAuCitron {
                     'name' => __('Trackers - Google', 'wputarteaucitron'),
                     'is_open' => false
                 ),
+                'trackers_hotjar' => array(
+                    'name' => __('Trackers - Hotjar', 'wputarteaucitron'),
+                    'is_open' => false
+                ),
                 'trackers_matomo' => array(
                     'name' => __('Trackers - Matomo', 'wputarteaucitron'),
                     'is_open' => false
                 ),
+                'trackers_pardot' => array(
+                    'name' => __('Trackers - Pardot', 'wputarteaucitron'),
+                    'is_open' => false
+                ),
                 'trackers' => array(
-                    'name' => __('Trackers', 'wputarteaucitron'),
+                    'name' => __('Trackers - Other', 'wputarteaucitron'),
                     'is_open' => false
                 )
             )

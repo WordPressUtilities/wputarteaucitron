@@ -1,3 +1,6 @@
 /assets/tarteaucitron/.gitignore
 /assets/tarteaucitron/.github
 *.mo.php
+node_modules
+vendor
+.DS_Store

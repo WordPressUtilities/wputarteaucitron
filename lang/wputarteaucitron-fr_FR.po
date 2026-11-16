@@ -164,8 +164,8 @@ msgstr ""
 " - Matomo"
 
 #: .././wputarteaucitron.php:180
-msgid "Trackers"
-msgstr "Trackers"
+msgid "Trackers - Other"
+msgstr "Trackers - Autres"
 
 #: .././wputarteaucitron.php:192
 msgid "Activate banner"
